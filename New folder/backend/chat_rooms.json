@@ -8,5 +8,16 @@
       "freelancer_alex"
     ],
     "created_at": 1791654859.3923044
+  },
+  {
+    "id": "room-abf9cc9781a44c418f7f1e7736444eaf",
+    "name": "marcus Vance",
+    "visibility": "private",
+    "created_by": "freelancer_supercyd",
+    "member_ids": [
+      "freelancer_supercyd",
+      "freelancer_marcus"
+    ],
+    "created_at": 1791657894.810045
   }
 ]

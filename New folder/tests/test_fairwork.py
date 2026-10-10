@@ -392,6 +392,20 @@ class TestFairworkPlatform(unittest.TestCase):
         self.assertEqual(successful_login.status_code, 200)
         self.assertEqual(successful_login.get_json()["user_id"], "company_novatech")
 
+    def test_live_chat_pages_include_google_translate(self):
+        for username, dashboard in (
+            ("company_novatech", "/company"),
+            ("freelancer_alex", "/freelancer")
+        ):
+            client = app.test_client()
+            self.assertEqual(demo_login(client, username).status_code, 200)
+            response = client.get(dashboard)
+            self.assertEqual(response.status_code, 200)
+            page = response.get_data(as_text=True)
+            self.assertIn('id="chat-translate-toggle"', page)
+            self.assertIn('id="chat-google-translate"', page)
+            self.assertIn("/static/google_translate.js", page)
+
     def test_registration_persists_hashed_credentials_and_rejects_duplicates(self):
         with tempfile.TemporaryDirectory() as directory:
             store_path = f"{directory}/accounts.json"

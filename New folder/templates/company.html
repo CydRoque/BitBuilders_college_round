@@ -374,7 +374,7 @@
                 <!-- Right Main Chat Pane -->
                 <div class="flex-1 flex flex-col bg-black relative">
                     <!-- Chat Top Header -->
-                    <div class="p-3 px-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
+                    <div class="relative p-3 px-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-white">
                                 <span id="chat-header-avatar">AR</span>
@@ -391,10 +391,14 @@
                         </div>
 
                         <div class="flex items-center space-x-3 text-zinc-400 text-sm">
+                            <button id="chat-translate-toggle" type="button" class="rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-zinc-800 transition flex items-center gap-1.5" aria-expanded="false" aria-controls="chat-google-translate" title="Translate this page">
+                                <i class="fa-solid fa-language"></i><span>Translate</span>
+                            </button>
                             <button onclick="showToast('Initiating encrypted voice channel...')" class="hover:text-white" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
                             <button onclick="showToast('Initiating encrypted video room...')" class="hover:text-white" title="Video Call"><i class="fa-solid fa-video"></i></button>
                             <button onclick="switchTab('tracker')" class="hover:text-white" title="Delivery Tracker"><i class="fa-solid fa-route"></i></button>
                         </div>
+                        <div id="chat-google-translate" class="hidden absolute right-3 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] rounded-xl border border-zinc-700 bg-zinc-950 p-3 shadow-2xl" aria-label="Choose chat page language"></div>
                     </div>
 
                     <!-- Chat Messages Feed -->
@@ -1196,5 +1200,6 @@
         });
     </script>
     <script src="{{ url_for('static', filename='chat_rooms.js') }}"></script>
+    <script src="{{ url_for('static', filename='google_translate.js') }}"></script>
 </body>
 </html>

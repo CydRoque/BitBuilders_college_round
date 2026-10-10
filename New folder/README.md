@@ -46,6 +46,7 @@ Fairwork connects companies with qualified freelancers using smart contract escr
    - Private rooms are limited to their creator and the company/freelancer accounts invited at creation.
    - Existing contract chats remain available alongside rooms in both dashboards.
    - In the **Chat** tab, create a room, choose its visibility, and select invitees for a private room; use the Public and Private filters to browse rooms.
+   - Both company and freelancer live chat headers provide an on-demand Google Translate language selector.
 
 2. **Multi-Factor Qualification Matching Engine**
    - Algorithmic matching based on:
