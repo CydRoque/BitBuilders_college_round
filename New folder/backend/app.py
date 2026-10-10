@@ -404,6 +404,91 @@ chat_store = ChatStore()
 
 # --- WhatsApp-Style Real-Time Chat API Endpoints ---
 
+@app.route("/api/chat/rooms", methods=["GET", "POST"])
+def chat_rooms():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if request.method == "GET":
+        users = [
+            {"id": user.id, "name": user.name, "role": "company"}
+            for user in engine.companies.values()
+        ] + [
+            {"id": user.id, "name": user.name, "role": "freelancer"}
+            for user in engine.freelancers.values()
+        ]
+        return jsonify({
+            "rooms": chat_store.get_rooms_for_user(user_id),
+            "users": users,
+            "current_user_id": user_id
+        })
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "A JSON object is required"}), 400
+
+    name = data.get("name")
+    visibility = data.get("visibility", "public")
+    member_ids = data.get("member_ids", [])
+    if not isinstance(name, str) or not name.strip() or len(name.strip()) > 80:
+        return jsonify({"error": "Room name must be between 1 and 80 characters"}), 400
+    if visibility not in ("public", "private"):
+        return jsonify({"error": "Visibility must be public or private"}), 400
+    if not isinstance(member_ids, list) or any(not isinstance(member_id, str) for member_id in member_ids):
+        return jsonify({"error": "member_ids must be a list of user IDs"}), 400
+    if any(member_id not in engine.companies and member_id not in engine.freelancers for member_id in member_ids):
+        return jsonify({"error": "One or more invited users do not exist"}), 400
+
+    invited_members = list(dict.fromkeys(member_ids)) if visibility == "private" else []
+    room = chat_store.create_room(name.strip(), visibility, user_id, invited_members)
+    return jsonify({"success": True, "room": room}), 201
+
+@app.route("/api/chat/rooms/<room_id>", methods=["GET"])
+def get_room_messages(room_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+    room = chat_store.get_room(room_id)
+    if not room or not chat_store.can_access_room(room, user_id):
+        return jsonify({"error": "Room not found"}), 404
+
+    return jsonify({
+        "room": {key: room[key] for key in ("id", "name", "visibility")},
+        "messages": chat_store.get_messages_for_contract(room_id, mark_read_by=user_id),
+        "current_user_id": user_id
+    })
+
+@app.route("/api/chat/rooms/<room_id>/send", methods=["POST"])
+def send_room_message(room_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+    room = chat_store.get_room(room_id)
+    if not room or not chat_store.can_access_room(room, user_id):
+        return jsonify({"error": "Room not found"}), 404
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "A JSON object is required"}), 400
+    text = data.get("text", "")
+    image_data = data.get("image_data")
+    if not isinstance(text, str) or (image_data is not None and not isinstance(image_data, str)):
+        return jsonify({"error": "Message text and image data must be strings"}), 400
+    text = text.strip()
+    if not text and not image_data:
+        return jsonify({"error": "Message text or image required"}), 400
+
+    message = chat_store.add_message(
+        contract_id=room_id,
+        sender_id=user_id,
+        sender_name=session.get("user_name", "Anonymous"),
+        sender_role=session.get("user_role", "counterpart"),
+        text=text,
+        image_data=image_data
+    )
+    return jsonify({"success": True, "message": message}), 201
+
 @app.route("/api/chat/<contract_id>", methods=["GET"])
 def get_chat_messages(contract_id):
     user_id = session.get("user_id")
@@ -453,4 +538,3 @@ def get_chat_conversations():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-

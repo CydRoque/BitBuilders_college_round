@@ -16,6 +16,7 @@ Fairwork connects companies with qualified freelancers using smart contract escr
      * `wallets`: Protocol treasury, company wallets, and freelancer token balances.
      * `contracts`: Project scopes, budgets, escrow balances, and Amazon tracker states.
      * `chat_messages`: WhatsApp-style real-time chats, timestamps, and image attachments.
+   - Chat room metadata is persisted in `backend/chat_rooms.json`.
    - Built-in automatic fallback to local SQLite (`sqlite:///fairwork.db`) if deployed to an environment without PostgreSQL.
 
 2. **Flask Sessions & Multi-Device Isolation**
@@ -33,6 +34,13 @@ Fairwork connects companies with qualified freelancers using smart contract escr
 3. **Dual Marketplace for Companies & Freelancers**
    - Companies can post milestone-based job agreements with escrow deposits and view qualified talent.
    - Freelancers can browse open jobs, check required skills, and apply with verifiable credentials.
+
+4. **Public and Private Chat Rooms**
+   - Signed-in companies and freelancers can create and participate in public rooms.
+   - Public rooms are available to every signed-in company and freelancer.
+   - Private rooms are limited to their creator and the company/freelancer accounts invited at creation.
+   - Existing contract chats remain available alongside rooms in both dashboards.
+   - In the **Chat** tab, create a room, choose its visibility, and select invitees for a private room; use the Public and Private filters to browse rooms.
 
 2. **Multi-Factor Qualification Matching Engine**
    - Algorithmic matching based on:

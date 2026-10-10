@@ -10,11 +10,14 @@ import os
 from typing import List, Dict, Any, Optional
 
 CHAT_DB_FILE = os.path.join(os.path.dirname(__file__), "chat_history.json")
+CHAT_ROOMS_FILE = os.path.join(os.path.dirname(__file__), "chat_rooms.json")
 
 class ChatStore:
     def __init__(self):
         self.messages: List[Dict[str, Any]] = []
+        self.rooms: List[Dict[str, Any]] = []
         self.load_messages()
+        self.load_rooms()
         if not self.messages:
             self._init_seed_messages()
 
@@ -43,6 +46,63 @@ class ChatStore:
                 json.dump(self.messages, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving chat history: {e}")
+
+    def load_rooms(self):
+        if not os.path.exists(CHAT_ROOMS_FILE):
+            return
+        try:
+            with open(CHAT_ROOMS_FILE, "r", encoding="utf-8") as f:
+                rooms = json.load(f)
+            if not isinstance(rooms, list):
+                raise ValueError("Chat rooms data must be a list.")
+            self.rooms = rooms
+        except (OSError, ValueError, json.JSONDecodeError) as e:
+            print(f"Error loading chat rooms: {e}")
+            self.rooms = []
+
+    def save_rooms(self):
+        try:
+            with open(CHAT_ROOMS_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.rooms, f, indent=2, ensure_ascii=False)
+        except OSError as e:
+            print(f"Error saving chat rooms: {e}")
+
+    def create_room(self, name: str, visibility: str, created_by: str,
+                    member_ids: List[str]) -> Dict[str, Any]:
+        room = {
+            "id": f"room-{uuid.uuid4().hex}",
+            "name": name,
+            "visibility": visibility,
+            "created_by": created_by,
+            "member_ids": list(dict.fromkeys([created_by, *member_ids])),
+            "created_at": time.time()
+        }
+        self.rooms.append(room)
+        self.save_rooms()
+        return room
+
+    def get_room(self, room_id: str) -> Optional[Dict[str, Any]]:
+        return next((room for room in self.rooms if room.get("id") == room_id), None)
+
+    def can_access_room(self, room: Dict[str, Any], user_id: str) -> bool:
+        return room.get("visibility") == "public" or user_id in room.get("member_ids", [])
+
+    def get_rooms_for_user(self, user_id: str) -> List[Dict[str, Any]]:
+        visible_rooms = []
+        for room in self.rooms:
+            if not self.can_access_room(room, user_id):
+                continue
+            messages = self.get_messages_for_contract(room["id"])
+            last_message = messages[-1] if messages else None
+            visible_rooms.append({
+                "id": room["id"],
+                "name": room["name"],
+                "visibility": room["visibility"],
+                "created_by": room["created_by"],
+                "last_message": last_message.get("text") if last_message else "No messages yet",
+                "unread_count": sum(1 for message in messages if user_id not in message.get("read_by", []))
+            })
+        return visible_rooms
 
     def _init_seed_messages(self):
         now = time.time()

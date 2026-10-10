@@ -24,6 +24,20 @@
             border-color: #ffffff;
             background-color: #121215;
         }
+        #google_translate_element .goog-te-gadget {
+            color: #a1a1aa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11px;
+        }
+        #google_translate_element .goog-te-gadget .goog-te-combo {
+            margin: 0;
+            max-width: 150px;
+            padding: 5px 8px;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            background: #09090b;
+            color: #fff;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-white selection:text-black">
@@ -43,11 +57,18 @@
             <div class="text-xs text-zinc-400 font-mono hidden sm:block">
                 Decentralized Milestone Agreements
             </div>
+            <div class="relative">
+                <button id="translate-toggle" type="button" class="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-zinc-800" aria-expanded="false" aria-controls="google_translate_element">
+                    <i class="fa-solid fa-language mr-1"></i> Translate
+                </button>
+                <div id="google_translate_element" class="hidden absolute right-0 top-full z-[60] mt-2 rounded-lg border border-zinc-700 bg-zinc-950 p-2" aria-label="Choose page language"></div>
+            </div>
         </div>
     </header>
 
     <!-- Main Auth Center -->
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-12 flex flex-col justify-center">
+        <div id="auth-feedback" class="hidden mb-5 rounded-xl border border-red-800 bg-red-950/60 px-4 py-3 text-sm text-red-200" role="alert" aria-live="polite"></div>
         <div class="text-center space-y-2 mb-8">
             <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase">
                 Access Platform
@@ -59,14 +80,14 @@
 
         <!-- Auth Navigation Tabs -->
         <div class="flex justify-center mb-6">
-            <div class="bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex space-x-1">
-                <button onclick="setAuthTab('quick')" id="tab-btn-quick" class="px-5 py-2 text-xs font-bold rounded-lg bg-white text-black transition">
+            <div class="bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex flex-wrap justify-center gap-1">
+                <button type="button" onclick="setAuthTab('quick')" id="tab-btn-quick" class="px-3 sm:px-5 py-2 text-xs font-bold rounded-lg bg-white text-black transition">
                     1-Click Demo Profiles
                 </button>
-                <button onclick="setAuthTab('register')" id="tab-btn-register" class="px-5 py-2 text-xs font-bold rounded-lg text-zinc-400 hover:text-white transition">
+                <button type="button" onclick="setAuthTab('register')" id="tab-btn-register" class="px-3 sm:px-5 py-2 text-xs font-bold rounded-lg text-zinc-400 hover:text-white transition">
                     Create New Account
                 </button>
-                <button onclick="setAuthTab('signin')" id="tab-btn-signin" class="px-5 py-2 text-xs font-bold rounded-lg text-zinc-400 hover:text-white transition">
+                <button type="button" onclick="setAuthTab('signin')" id="tab-btn-signin" class="px-3 sm:px-5 py-2 text-xs font-bold rounded-lg text-zinc-400 hover:text-white transition">
                     Sign In Existing
                 </button>
             </div>
@@ -184,20 +205,24 @@
                 <div>
                     <span class="text-white font-bold">Multi-Session Isolated:</span> Open an Incognito window or different browser to log in as Company and Freelancer at the same time to test live deliverables and task relinquishment side-by-side!
                 </div>
+            </div>
+        </div>
+
 <!-- VIEW 3: Sign In Existing Account -->
-<div id="view-signin" class="hidden space-y-6">
+<div id="view-signin" class="hidden mono-card p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-6">
+    <div>
+        <h2 class="text-xl font-bold text-white uppercase tracking-tight">Sign In</h2>
+        <p class="mt-1 text-xs text-zinc-400">Enter your existing account ID or profile name to continue.</p>
+    </div>
     <form id="signin-form" onsubmit="handleSignin(event)" class="space-y-4">
         <div>
             <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1" for="signin-id">User ID or Name</label>
-            <input type="text" id="signin-id" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="e.g. company_novatech or Alex Rivera">
+            <input type="text" id="signin-id" required autocomplete="username" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="e.g. company_novatech or Alex Rivera">
         </div>
         <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-extrabold text-sm uppercase tracking-wider hover:bg-zinc-200 transition">Sign In</button>
     </form>
 </div>
 <!-- END VIEW 3 -->
-<!-- VIEW 2: Register New Account -->
-            </div>
-        </div>
 
         <!-- VIEW 2: Register New Account -->
         <div id="view-register" class="hidden mono-card p-8 rounded-2xl border border-zinc-800 space-y-6">
@@ -254,7 +279,49 @@
     </footer>
 
     <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'ar,bn,de,es,fr,hi,ja,ko,pt,ru,zh-CN',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+
+        function loadGoogleTranslate() {
+            const container = document.getElementById('google_translate_element');
+            const toggle = document.getElementById('translate-toggle');
+            const isOpening = container.classList.contains('hidden');
+            container.classList.toggle('hidden', !isOpening);
+            toggle.setAttribute('aria-expanded', String(isOpening));
+            if (!isOpening || window.googleTranslateScriptRequested) return;
+            window.googleTranslateScriptRequested = true;
+            window.googleTranslateElementInit = googleTranslateElementInit;
+            const script = document.createElement('script');
+            script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            script.onerror = () => {
+                window.googleTranslateScriptRequested = false;
+                showAuthFeedback('Google Translate could not load. Check your internet connection and try again.');
+            };
+            document.body.appendChild(script);
+        }
+
+        function showAuthFeedback(message) {
+            const feedback = document.getElementById('auth-feedback');
+            feedback.textContent = message;
+            feedback.classList.remove('hidden');
+        }
+
+        function clearAuthFeedback() {
+            const feedback = document.getElementById('auth-feedback');
+            feedback.textContent = '';
+            feedback.classList.add('hidden');
+        }
+
+        document.getElementById('translate-toggle').addEventListener('click', loadGoogleTranslate);
+
         function setAuthTab(tab) {
+    clearAuthFeedback();
     document.getElementById('view-quick').classList.toggle('hidden', tab !== 'quick');
     document.getElementById('view-register').classList.toggle('hidden', tab !== 'register');
     document.getElementById('view-signin').classList.toggle('hidden', tab !== 'signin');
@@ -270,7 +337,7 @@
         : 'px-5 py-2 text-xs font-bold rounded-lg text-zinc-400 hover:text-white transition';
 };
 
-        }
+        
 
         document.querySelectorAll('input[name="reg-role"]').forEach(r => {
             r.addEventListener('change', () => {
@@ -281,6 +348,7 @@
         });
 
         async function loginAs(userId) {
+            clearAuthFeedback();
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -288,18 +356,30 @@
                     body: JSON.stringify({ user_id: userId })
                 });
                 const data = await res.json();
-                if (data.success) {
+                if (res.ok && data.success) {
                     window.location.href = data.redirect;
                 } else {
-                    alert(data.error);
+                    showAuthFeedback(data.error || 'Unable to sign in. Please try again.');
                 }
-            } catch (err) {
-                alert("Login failed: " + err);
+            } catch (error) {
+                showAuthFeedback(`Login failed: ${error.message}`);
             }
+        }
+
+        async function handleSignin(event) {
+            event.preventDefault();
+            clearAuthFeedback();
+            const userId = document.getElementById('signin-id').value.trim();
+            if (!userId) {
+                showAuthFeedback('Enter your account ID or name.');
+                return;
+            }
+            await loginAs(userId);
         }
 
         async function handleRegister(e) {
             e.preventDefault();
+            clearAuthFeedback();
             const role = document.querySelector('input[name="reg-role"]:checked').value;
             const name = document.getElementById('reg-name').value;
             const industry = document.getElementById('reg-industry').value;
@@ -315,13 +395,13 @@
                     })
                 });
                 const data = await res.json();
-                if (data.success) {
+                if (res.ok && data.success) {
                     window.location.href = data.redirect;
                 } else {
-                    alert(data.error);
+                    showAuthFeedback(data.error || 'Unable to create your account. Please try again.');
                 }
-            } catch (err) {
-                alert("Registration failed: " + err);
+            } catch (error) {
+                showAuthFeedback(`Registration failed: ${error.message}`);
             }
         }
     </script>

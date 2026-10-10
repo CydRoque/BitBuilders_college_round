@@ -278,6 +278,28 @@
                             <input type="text" id="chat-search" placeholder="Search conversations..." class="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none">
                         </div>
                     </div>
+                    <div class="p-3 border-b border-zinc-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-white">Company & Freelancer Rooms</span>
+                            <button id="chat-room-create-toggle" type="button" class="text-[10px] font-bold text-white hover:underline">Create</button>
+                        </div>
+                        <div class="flex gap-1">
+                            <button type="button" data-room-filter="public" class="flex-1 rounded bg-zinc-800 px-2 py-1 text-[10px] text-white">Public</button>
+                            <button type="button" data-room-filter="private" class="flex-1 rounded bg-zinc-900 px-2 py-1 text-[10px] text-zinc-400">Private</button>
+                        </div>
+                        <div id="chat-room-list" class="max-h-32 overflow-y-auto divide-y divide-zinc-900">
+                            <div class="p-2 text-center text-[10px] text-zinc-500">Loading rooms...</div>
+                        </div>
+                        <form id="chat-room-create-form" class="hidden space-y-2 border-t border-zinc-800 pt-2">
+                            <input id="chat-room-name" type="text" maxlength="80" required placeholder="Room name" class="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-white focus:outline-none">
+                            <select id="chat-room-visibility" class="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-white">
+                                <option value="public">Public — all signed-in users</option>
+                                <option value="private">Private — invited members only</option>
+                            </select>
+                            <select id="chat-room-members" multiple class="hidden w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-white" aria-label="Invite users to private room"></select>
+                            <button type="submit" class="w-full rounded-lg bg-white px-3 py-2 text-xs font-bold text-black">Create room</button>
+                        </form>
+                    </div>
                     <div id="chat-conversations-list" class="flex-1 overflow-y-auto divide-y divide-zinc-900">
                         <div class="p-4 text-center text-xs text-zinc-500 font-mono">Loading chats...</div>
                     </div>
@@ -352,6 +374,23 @@
                 </div>
             </div>
         </section>
+
+        <div id="chat-room-modal" class="hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm p-4 flex items-center justify-center">
+            <section class="w-full max-w-2xl h-[min(80vh,680px)] flex flex-col rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl">
+                <header class="flex items-center justify-between border-b border-zinc-800 p-4">
+                    <div>
+                        <h2 id="chat-room-modal-title" class="text-sm font-black text-white"></h2>
+                        <p id="chat-room-modal-visibility" class="mt-1 text-[10px] uppercase tracking-wider text-zinc-400"></p>
+                    </div>
+                    <button id="chat-room-close" type="button" class="rounded-lg bg-zinc-800 px-3 py-2 text-xs text-white">Close</button>
+                </header>
+                <div id="chat-room-messages" class="flex-1 space-y-3 overflow-y-auto p-4"></div>
+                <form id="chat-room-message-form" class="flex gap-2 border-t border-zinc-800 p-3">
+                    <input id="chat-room-message-input" type="text" maxlength="4000" required placeholder="Write a message..." class="min-w-0 flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none">
+                    <button type="submit" class="rounded-xl bg-white px-4 py-3 text-xs font-extrabold uppercase text-black">Send</button>
+                </form>
+            </section>
+        </div>
 
     </main>
 
@@ -839,5 +878,6 @@
 
         document.addEventListener('DOMContentLoaded', refreshData);
     </script>
+    <script src="{{ url_for('static', filename='chat_rooms.js') }}"></script>
 </body>
 </html>

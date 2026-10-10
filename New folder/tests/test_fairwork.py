@@ -4,10 +4,11 @@ Tests Blockchain integrity, Smart Contract Escrows, Late Penalties, and Relinqui
 """
 
 import unittest
+from unittest.mock import patch
 from backend.blockchain import Blockchain, Transaction, sha256_hash, compute_merkle_root
 from backend.models import FreelancerProfile, CompanyProfile, Milestone, JobContract
 from backend.fairwork_engine import FairworkEngine
-from backend.app import app
+from backend.app import app, chat_store
 
 class TestFairworkPlatform(unittest.TestCase):
     def setUp(self):
@@ -169,6 +170,16 @@ class TestFairworkPlatform(unittest.TestCase):
         res_f_dash = self.client.get('/freelancer')
         self.assertEqual(res_f_dash.status_code, 200)
 
+    def test_login_page_includes_existing_signin_and_translate_widget(self):
+        response = self.client.get('/login')
+        self.assertEqual(response.status_code, 200)
+        page = response.get_data(as_text=True)
+        self.assertIn('id="view-signin"', page)
+        self.assertIn("function handleSignin(event)", page)
+        self.assertIn('id="auth-feedback"', page)
+        self.assertIn('id="google_translate_element"', page)
+        self.assertIn("translate.google.com/translate_a/element.js", page)
+
     def test_whatsapp_chat_messaging_and_image_storage(self):
         # 1. Login as Freelancer Alex
         self.client.post('/api/auth/login', json={'user_id': 'freelancer_alex'})
@@ -196,7 +207,66 @@ class TestFairworkPlatform(unittest.TestCase):
         })
         self.assertEqual(reply_res.status_code, 201)
 
+    def test_public_and_private_chat_rooms_are_access_controlled(self):
+        original_rooms = chat_store.rooms
+        original_messages = chat_store.messages
+        chat_store.rooms = []
+        chat_store.messages = []
+        try:
+            with patch.object(chat_store, "save_rooms"), \
+                    patch.object(chat_store, "save_messages"), \
+                    patch("backend.db.DatabaseService.save_chat_message"):
+                anonymous = app.test_client()
+                self.assertEqual(anonymous.get("/api/chat/rooms").status_code, 401)
+
+                company = app.test_client()
+                company.post("/api/auth/login", json={"user_id": "company_novatech"})
+                private_response = company.post("/api/chat/rooms", json={
+                    "name": "Project Planning",
+                    "visibility": "private",
+                    "member_ids": ["freelancer_alex"]
+                })
+                self.assertEqual(private_response.status_code, 201)
+                private_room = private_response.get_json()["room"]
+                self.assertEqual(
+                    company.get(f"/api/chat/rooms/{private_room['id']}").status_code,
+                    200
+                )
+
+                alex = app.test_client()
+                alex.post("/api/auth/login", json={"user_id": "freelancer_alex"})
+                self.assertEqual(
+                    alex.get(f"/api/chat/rooms/{private_room['id']}").status_code,
+                    200
+                )
+
+                priya = app.test_client()
+                priya.post("/api/auth/login", json={"user_id": "freelancer_priya"})
+                self.assertEqual(
+                    priya.get(f"/api/chat/rooms/{private_room['id']}").status_code,
+                    404
+                )
+                visible_private_rooms = priya.get("/api/chat/rooms").get_json()["rooms"]
+                self.assertNotIn(private_room["id"], [room["id"] for room in visible_private_rooms])
+
+                public_response = alex.post("/api/chat/rooms", json={
+                    "name": "Freelancer Lounge",
+                    "visibility": "public"
+                })
+                self.assertEqual(public_response.status_code, 201)
+                public_room = public_response.get_json()["room"]
+                send_response = alex.post(
+                    f"/api/chat/rooms/{public_room['id']}/send",
+                    json={"text": "Hello, everyone!"}
+                )
+                self.assertEqual(send_response.status_code, 201)
+                public_messages = priya.get(
+                    f"/api/chat/rooms/{public_room['id']}"
+                ).get_json()["messages"]
+                self.assertEqual(public_messages[0]["text"], "Hello, everyone!")
+        finally:
+            chat_store.rooms = original_rooms
+            chat_store.messages = original_messages
+
 if __name__ == "__main__":
     unittest.main()
-
-
