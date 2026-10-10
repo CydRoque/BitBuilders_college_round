@@ -13,7 +13,8 @@
       "company_novatech",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -30,7 +31,8 @@
       "company_novatech",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -47,7 +49,8 @@
       "freelancer_alex",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -64,7 +67,8 @@
       "company_novatech",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -81,7 +85,8 @@
       "freelancer_alex",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -98,7 +103,8 @@
       "freelancer_alex",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -115,7 +121,8 @@
       "company_novatech",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -132,7 +139,8 @@
       "freelancer_alex",
       "company_aurora",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -149,7 +157,8 @@
       "company_aurora",
       "freelancer_alex",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -166,7 +175,8 @@
       "company_novatech",
       "freelancer_alex",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -182,7 +192,8 @@
       "company_novatech",
       "freelancer_alex",
       "freelancer_priya",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -198,7 +209,8 @@
       "freelancer_priya",
       "company_novatech",
       "freelancer_cyd",
-      "freelancer_alex"
+      "freelancer_alex",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -213,7 +225,9 @@
     "read_by": [
       "company_novatech",
       "freelancer_cyd",
-      "freelancer_alex"
+      "freelancer_alex",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -228,7 +242,9 @@
     "read_by": [
       "freelancer_alex",
       "company_novatech",
-      "freelancer_cyd"
+      "freelancer_cyd",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -243,7 +259,9 @@
     "read_by": [
       "company_novatech",
       "freelancer_cyd",
-      "freelancer_alex"
+      "freelancer_alex",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -257,7 +275,9 @@
     "timestamp": 1791652126.7474716,
     "read_by": [
       "freelancer_alex",
-      "company_novatech"
+      "company_novatech",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -271,7 +291,9 @@
     "timestamp": 1791652126.764486,
     "read_by": [
       "company_novatech",
-      "freelancer_alex"
+      "freelancer_alex",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -285,7 +307,9 @@
     "timestamp": 1791652215.5676594,
     "read_by": [
       "freelancer_alex",
-      "company_novatech"
+      "company_novatech",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -299,7 +323,9 @@
     "timestamp": 1791652215.5830836,
     "read_by": [
       "company_novatech",
-      "freelancer_alex"
+      "freelancer_alex",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -313,7 +339,9 @@
     "timestamp": 1791652389.0381498,
     "read_by": [
       "freelancer_alex",
-      "company_novatech"
+      "company_novatech",
+      "freelancer_priya",
+      "freelancer_supercyd"
     ]
   },
   {
@@ -327,7 +355,129 @@
     "timestamp": 1791652389.0542893,
     "read_by": [
       "company_novatech",
-      "freelancer_alex"
+      "freelancer_alex",
+      "freelancer_priya",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "94f8a8a8-53ee-4b5c-9def-4269333f8887",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Here is the deployed contract screenshot and test logs.",
+    "image_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "timestamp": 1791653322.535541,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech",
+      "freelancer_priya",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "e215bdc6-d254-437d-86fd-7b6460f2996a",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "company_novatech",
+    "sender_name": "NovaTech Decentralized Systems",
+    "sender_role": "company",
+    "text": "Image received! Code verified on block explorer.",
+    "image_data": null,
+    "timestamp": 1791653322.5524302,
+    "read_by": [
+      "company_novatech",
+      "freelancer_alex",
+      "freelancer_priya",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "55627d1d-57e2-4e2a-8daa-97ff91dded47",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Hello",
+    "image_data": null,
+    "timestamp": 1791654845.6734254,
+    "read_by": [
+      "freelancer_alex",
+      "freelancer_priya",
+      "company_novatech",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "344b2b9d-713b-4f36-9e29-414c163dffae",
+    "contract_id": "room-92340a6ae44c4011a37e2935d36a9200",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Hello everyone",
+    "image_data": null,
+    "timestamp": 1791654866.9143698,
+    "read_by": [
+      "freelancer_alex",
+      "freelancer_priya"
+    ]
+  },
+  {
+    "id": "4478ee88-a474-4ba0-b4da-ea2b70892478",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Here is the deployed contract screenshot and test logs.",
+    "image_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "timestamp": 1791655755.7723155,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "b6fe47c2-f56a-4042-a053-278a76617952",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "company_novatech",
+    "sender_name": "NovaTech Decentralized Systems",
+    "sender_role": "company",
+    "text": "Image received! Code verified on block explorer.",
+    "image_data": null,
+    "timestamp": 1791655755.9609647,
+    "read_by": [
+      "company_novatech",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "d2616e0e-262c-4d40-a59d-954955b96abf",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Here is the deployed contract screenshot and test logs.",
+    "image_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "timestamp": 1791655811.4818223,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech",
+      "freelancer_supercyd"
+    ]
+  },
+  {
+    "id": "9e1c1762-720a-4d11-9d1f-a294a748ddfe",
+    "contract_id": "FWK-CONTRACT-101",
+    "sender_id": "company_novatech",
+    "sender_name": "NovaTech Decentralized Systems",
+    "sender_role": "company",
+    "text": "Image received! Code verified on block explorer.",
+    "image_data": null,
+    "timestamp": 1791655811.6808677,
+    "read_by": [
+      "company_novatech",
+      "freelancer_supercyd"
     ]
   }
 ]

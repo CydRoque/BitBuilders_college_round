@@ -81,20 +81,12 @@
             </div>
         </div>
 
-        <!-- Simulation Time Bar -->
+        <!-- Live local time -->
         <div class="bg-zinc-950 border-t border-b border-zinc-900 px-4 py-2 text-xs">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center space-x-3 font-mono">
-                    <span class="text-zinc-400"><i class="fa-regular fa-clock text-white"></i> Virtual Clock:</span>
-                    <span id="virtual-clock-display" class="text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 font-bold">--</span>
-                </div>
-
-                <div class="flex items-center space-x-1.5">
-                    <button onclick="advanceTime(6)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[11px] border border-zinc-800 transition">+6h</button>
-                    <button onclick="advanceTime(12)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[11px] border border-zinc-800 transition">+12h</button>
-                    <button onclick="advanceTime(24)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[11px] border border-zinc-700 transition" title="Pass deadline">+24h (Deadline)</button>
-                    <button onclick="advanceTime(48)" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-[11px] border border-white transition font-bold" title="Breach buffer">+48h (Buffer Breach)</button>
-                    <button onclick="resetTime()" class="px-2 py-1 rounded bg-zinc-950 hover:bg-zinc-900 text-zinc-400 font-mono text-[11px] border border-zinc-800 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    <span class="text-zinc-400"><i class="fa-regular fa-clock text-white"></i> Local Time:</span>
+                    <span id="real-clock-display" class="text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 font-bold">--</span>
                 </div>
             </div>
         </div>
@@ -147,17 +139,17 @@
                     <div class="flex items-center gap-4 bg-zinc-950 p-4 rounded-xl border border-zinc-800">
                         <div class="text-center px-2">
                             <div class="text-[10px] text-zinc-500 uppercase font-mono">Contract Budget</div>
-                            <div id="contract-budget-display" class="text-base font-bold font-mono text-white">0 FWK</div>
+                            <div id="contract-budget-display" class="text-base font-bold font-mono text-white">0 USDC</div>
                         </div>
                         <div class="h-6 w-px bg-zinc-800"></div>
                         <div class="text-center px-2">
                             <div class="text-[10px] text-zinc-500 uppercase font-mono">In Escrow Vault</div>
-                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-white">0 FWK</div>
+                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-white">0 USDC</div>
                         </div>
                         <div class="h-6 w-px bg-zinc-800"></div>
                         <div class="text-center px-2">
                             <div class="text-[10px] text-zinc-500 uppercase font-mono">Paid to Me</div>
-                            <div id="contract-released-display" class="text-base font-bold font-mono text-zinc-300">0 FWK</div>
+                            <div id="contract-released-display" class="text-base font-bold font-mono text-zinc-300">0 USDC</div>
                         </div>
                     </div>
                 </div>
@@ -167,6 +159,10 @@
                         <div>
                             <span class="text-zinc-500">Client / Company: </span>
                             <span id="tracker-company-name" class="font-bold text-white">NovaTech Systems</span>
+                        </div>
+                        <div>
+                            <span class="text-zinc-500">Assigned Freelancer: </span>
+                            <span id="tracker-freelancer-name" class="font-bold text-white">Loading...</span>
                         </div>
                         <div>
                             <span class="text-zinc-500">Contract Vault: </span>
@@ -415,6 +411,7 @@
             <p class="text-xs text-zinc-400">
                 Your work will be hashed with SHA-256 and verified against the contract deadline.
             </p>
+            <p id="submit-deliverable-error" class="hidden rounded-lg border border-red-800 bg-red-950/50 p-2 text-xs text-red-200" role="alert"></p>
             <div>
                 <label class="block text-xs uppercase font-mono text-zinc-400 mb-1">Milestone</label>
                 <input type="text" id="modal-submit-milestone-title" disabled class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-400">
@@ -430,7 +427,7 @@
             </div>
             <div class="flex justify-end space-x-2 pt-2">
                 <button onclick="closeModal('modal-submit')" class="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-xs font-bold">Cancel</button>
-                <button onclick="executeDeliverableSubmission()" class="px-5 py-2 rounded-xl bg-white text-black text-xs font-extrabold uppercase tracking-wider">Generate Proof & Submit</button>
+                <button id="execute-submit-deliverable-button" onclick="executeDeliverableSubmission()" class="px-5 py-2 rounded-xl bg-white text-black text-xs font-extrabold uppercase tracking-wider">Generate Proof & Submit</button>
             </div>
         </div>
     </div>
@@ -440,7 +437,9 @@
 
     <script>
         let activeContractId = 'FWK-CONTRACT-101';
+        const currentUserId = {{ user.id|tojson }};
         let currentContract = null;
+        let refreshInProgress = false;
 
         let chatInterval = null;
         let stagedImageData = null;
@@ -467,24 +466,26 @@
         }
 
         async function refreshData() {
+            if (refreshInProgress) return;
+            refreshInProgress = true;
             try {
                 const resMe = await fetch('/api/me');
                 if (!resMe.ok) { window.location.href = '/login'; return; }
                 const meData = await resMe.json();
-                document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} FWK`;
+                document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} USDC`;
 
                 const resOverview = await fetch('/api/overview');
                 const overview = await resOverview.json();
-                document.getElementById('virtual-clock-display').innerText = overview.virtual_time_str;
-
                 const resC = await fetch(`/api/contract/${activeContractId}`);
                 if (resC.ok) {
                     const dataC = await resC.json();
                     currentContract = dataC.contract;
-                    renderContract(currentContract, overview.virtual_time);
+                    renderContract(currentContract, overview.current_time);
                 }
             } catch (err) {
                 console.error(err);
+            } finally {
+                refreshInProgress = false;
             }
         }
 
@@ -493,10 +494,14 @@
             document.getElementById('contract-status-badge').innerText = c.status;
             document.getElementById('contract-title-display').innerText = c.title;
             document.getElementById('contract-desc-display').innerText = c.description;
-            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} FWK`;
-            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} FWK`;
-            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} FWK`;
+            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} USDC`;
+            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} USDC`;
+            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} USDC`;
             document.getElementById('tracker-company-name').innerText = c.company_name;
+            document.getElementById('tracker-freelancer-name').innerText =
+                c.current_freelancer_id === currentUserId
+                    ? `${c.freelancer_name} (you)`
+                    : `${c.freelancer_name} (not assigned to you)`;
             document.getElementById('tracker-sc-address').innerText = c.smart_contract_address;
 
             // Stepper
@@ -541,7 +546,9 @@
                 else badgeHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-400 border border-zinc-800">DEADLINE: ${m.deadline_hours}h</span>`;
 
                 let actionHtml = '';
-                if (m.status === 'IN_PROGRESS' || m.status === 'SUBMITTED') {
+                if (c.current_freelancer_id === currentUserId &&
+                    m.assigned_freelancer_id === currentUserId &&
+                    (m.status === 'IN_PROGRESS' || m.status === 'SUBMITTED')) {
                     actionHtml = `<button onclick="openSubmitModal(${m.index}, '${m.title}')" class="px-4 py-2 rounded-lg bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition">
                         ${m.status === 'SUBMITTED' ? 'Update Submission' : 'Submit Deliverable'}
                     </button>`;
@@ -559,8 +566,8 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="text-right font-mono">
-                                <div class="text-xs font-bold text-white">${m.amount.toLocaleString()} FWK</div>
-                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-zinc-400">-${m.penalty_amount} FWK Penalty</div>` : ''}
+                                <div class="text-xs font-bold text-white">${m.amount.toLocaleString()} USDC</div>
+                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-zinc-400">-${m.penalty_amount} USDC Penalty</div>` : ''}
                             </div>
                             <div>${actionHtml}</div>
                         </div>
@@ -588,7 +595,7 @@
                         <p class="text-xs text-zinc-400 line-clamp-2">${c.description}</p>
                         <div class="flex justify-between items-center pt-2 border-t border-zinc-800 text-xs font-mono">
                             <span class="text-zinc-500">${c.company_name}</span>
-                            <span class="text-white font-bold">${c.total_budget} FWK</span>
+                            <span class="text-white font-bold">${c.total_budget} USDC</span>
                         </div>
                         <button onclick="applyToContract('${c.id}')" class="w-full py-2 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition">
                             Apply for Job
@@ -616,13 +623,24 @@
         function openSubmitModal(milestoneIndex, title) {
             document.getElementById('modal-submit-milestone-index').value = milestoneIndex;
             document.getElementById('modal-submit-milestone-title').value = title;
+            document.getElementById('modal-submit-text').value = '';
+            document.getElementById('modal-submit-link').value = '';
+            document.getElementById('submit-deliverable-error').classList.add('hidden');
             document.getElementById('modal-submit').classList.remove('hidden');
         }
 
         async function executeDeliverableSubmission() {
             const idx = parseInt(document.getElementById('modal-submit-milestone-index').value);
-            const text = document.getElementById('modal-submit-text').value;
-            const link = document.getElementById('modal-submit-link').value;
+            const text = document.getElementById('modal-submit-text').value.trim();
+            const link = document.getElementById('modal-submit-link').value.trim();
+            const error = document.getElementById('submit-deliverable-error');
+            const button = document.getElementById('execute-submit-deliverable-button');
+            if (!text && !link) {
+                error.innerText = 'Add deliverable details or a repository/artifact link before submitting.';
+                error.classList.remove('hidden');
+                return;
+            }
+            button.disabled = true;
             try {
                 const res = await fetch(`/api/contracts/${activeContractId}/submit_deliverable`, {
                     method: 'POST',
@@ -630,12 +648,20 @@
                     body: JSON.stringify({ milestone_index: idx, deliverable_text: text, deliverable_link: link })
                 });
                 const data = await res.json();
-                if (data.success) {
+                if (res.ok && data.success) {
                     closeModal('modal-submit');
                     showToast("Deliverable proof submitted and recorded on blockchain!");
-                    refreshData();
-                } else alert(data.error);
-            } catch (err) { alert(err); }
+                    await refreshData();
+                } else {
+                    error.innerText = data.error || 'The deliverable could not be submitted.';
+                    error.classList.remove('hidden');
+                }
+            } catch (err) {
+                error.innerText = `Submission failed: ${err.message}`;
+                error.classList.remove('hidden');
+            } finally {
+                button.disabled = false;
+            }
         }
 
         async function loadBlockchainData() {
@@ -662,20 +688,9 @@
             } catch (err) { console.error(err); }
         }
 
-        async function advanceTime(h) {
-            await fetch('/api/time/advance', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ hours: h })
-            });
-            showToast(`Time advanced +${h} hours`);
-            refreshData();
-        }
-
-        async function resetTime() {
-            await fetch('/api/time/reset', { method: 'POST' });
-            showToast("Clock reset to present");
-            refreshData();
+        function updateLocalClock() {
+            document.getElementById('real-clock-display').innerText =
+                new Date().toLocaleString();
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -876,7 +891,12 @@
             document.getElementById('modal-image-preview').classList.remove('hidden');
         }
 
-        document.addEventListener('DOMContentLoaded', refreshData);
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLocalClock();
+            setInterval(updateLocalClock, 1000);
+            refreshData();
+            setInterval(refreshData, 3000);
+        });
     </script>
     <script src="{{ url_for('static', filename='chat_rooms.js') }}"></script>
 </body>

@@ -14,8 +14,7 @@ from backend.models import FreelancerProfile, CompanyProfile, JobContract, Miles
 class FairworkEngine:
     def __init__(self):
         self.blockchain = Blockchain(difficulty=2)
-        # Virtual simulation time (starts at real time or designated baseline)
-        self.virtual_time = time.time()
+        self._time_offset = 0.0
         
         self.freelancers: Dict[str, FreelancerProfile] = {}
         self.companies: Dict[str, CompanyProfile] = {}
@@ -26,12 +25,16 @@ class FairworkEngine:
     def get_virtual_time(self) -> float:
         return self.virtual_time
 
+    @property
+    def virtual_time(self) -> float:
+        return time.time() + self._time_offset
+
     def advance_virtual_time(self, hours: float) -> float:
-        self.virtual_time += (hours * 3600.0)
+        self._time_offset += hours * 3600.0
         return self.virtual_time
 
     def reset_virtual_time(self):
-        self.virtual_time = time.time()
+        self._time_offset = 0.0
 
     def _init_seed_data(self):
         # 1. Seed Companies
@@ -105,7 +108,7 @@ class FairworkEngine:
         self.freelancers[f2.id] = f2
         self.freelancers[f3.id] = f3
 
-        # 3. Fund Wallets with FWK tokens on blockchain
+        # 3. Fund wallets with simulated USDC-denominated balances
         self.blockchain.set_wallet_balance(c1.wallet_address, 25000.0)
         self.blockchain.set_wallet_balance(c2.wallet_address, 15000.0)
         self.blockchain.set_wallet_balance(f1.wallet_address, 1200.0)
@@ -215,7 +218,7 @@ class FairworkEngine:
         total_budget = sum(float(m["amount"]) for m in milestones_data)
         company_balance = self.blockchain.get_wallet_balance(company.wallet_address)
         if company_balance < total_budget:
-            raise ValueError(f"Insufficient funds: Company wallet balance is {company_balance} FWK, requires {total_budget} FWK.")
+            raise ValueError(f"Insufficient funds: Company wallet balance is {company_balance} USDC, requires {total_budget} USDC.")
 
         milestones: List[Milestone] = []
         for idx, m_dict in enumerate(milestones_data):
@@ -530,6 +533,8 @@ class FairworkEngine:
             new_freelancer = self.freelancers.get(new_freelancer_id)
             if not new_freelancer:
                 raise ValueError(f"Replacement freelancer '{new_freelancer_id}' not found.")
+            if new_freelancer.id == prev_freelancer_id:
+                raise ValueError("The replacement freelancer must differ from the currently assigned freelancer.")
 
         # Compute remaining unpaid budget for contract
         remaining_budget = sum(m.amount for m in contract.milestones if m.status != "APPROVED")
@@ -731,4 +736,3 @@ class FairworkEngine:
         if user_id in self.freelancers:
             return self.freelancers[user_id], "freelancer"
         return None, None
-

@@ -76,20 +76,12 @@
             </div>
         </div>
 
-        <!-- Simulation Time Bar -->
+        <!-- Live local time -->
         <div class="bg-zinc-950 border-t border-b border-zinc-900 px-4 py-2 text-xs">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center space-x-3 font-mono">
-                    <span class="text-zinc-400"><i class="fa-regular fa-clock text-white"></i> Virtual Clock:</span>
-                    <span id="virtual-clock-display" class="text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 font-bold">--</span>
-                </div>
-
-                <div class="flex items-center space-x-1.5">
-                    <button onclick="advanceTime(6)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[11px] border border-zinc-800 transition">+6h</button>
-                    <button onclick="advanceTime(12)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[11px] border border-zinc-800 transition">+12h</button>
-                    <button onclick="advanceTime(24)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[11px] border border-zinc-700 transition" title="Trigger late penalty">+24h (Late Penalty)</button>
-                    <button onclick="advanceTime(48)" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-[11px] border border-white transition font-bold" title="Trigger buffer breach failover">+48h (Buffer Breach)</button>
-                    <button onclick="resetTime()" class="px-2 py-1 rounded bg-zinc-950 hover:bg-zinc-900 text-zinc-400 font-mono text-[11px] border border-zinc-800 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    <span class="text-zinc-400"><i class="fa-regular fa-clock text-white"></i> Local Time:</span>
+                    <span id="real-clock-display" class="text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 font-bold">--</span>
                 </div>
             </div>
         </div>
@@ -145,17 +137,17 @@
                     <div class="flex items-center gap-4 bg-zinc-950 p-4 rounded-xl border border-zinc-800">
                         <div class="text-center px-2">
                             <div class="text-[10px] text-zinc-500 uppercase font-mono">Total Budget</div>
-                            <div id="contract-budget-display" class="text-base font-bold font-mono text-white">0 FWK</div>
+                            <div id="contract-budget-display" class="text-base font-bold font-mono text-white">0 USDC</div>
                         </div>
                         <div class="h-6 w-px bg-zinc-800"></div>
                         <div class="text-center px-2">
                             <div class="text-[10px] text-zinc-500 uppercase font-mono">In Escrow</div>
-                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-white">0 FWK</div>
+                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-white">0 USDC</div>
                         </div>
                         <div class="h-6 w-px bg-zinc-800"></div>
                         <div class="text-center px-2">
                             <div class="text-[10px] text-zinc-500 uppercase font-mono">Released</div>
-                            <div id="contract-released-display" class="text-base font-bold font-mono text-zinc-300">0 FWK</div>
+                            <div id="contract-released-display" class="text-base font-bold font-mono text-zinc-300">0 USDC</div>
                         </div>
                     </div>
                 </div>
@@ -251,9 +243,17 @@
 
         <!-- TAB 2: APPLICANTS & QUALIFICATION MATCH -->
         <section id="view-applicants" class="hidden space-y-6">
-            <div>
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                <div>
                 <h2 class="text-lg font-black uppercase text-white tracking-wider">Candidate Proposals & Qualification Ratings</h2>
-                <p class="text-xs text-zinc-400">Review applicants ranked by algorithmic compatibility for your active contract.</p>
+                <p class="text-xs text-zinc-400">Review applicants ranked by algorithmic compatibility for your selected contract.</p>
+                </div>
+                <label class="block text-xs font-mono font-bold uppercase text-zinc-400">
+                    Your Contracts
+                    <select id="company-contract-select" onchange="selectCompanyContract(this.value)" class="mt-1 block min-w-64 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white">
+                        <option value="">Loading contracts...</option>
+                    </select>
+                </label>
             </div>
 
             <div id="applicants-list-container" class="space-y-4">
@@ -287,7 +287,7 @@
                         <div class="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
                             <div class="grid grid-cols-2 gap-3">
                                 <input type="text" class="m-title w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white" value="Architecture & Escrow Smart Contracts">
-                                <input type="number" class="m-amount w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white" value="2000" placeholder="Amount (FWK)">
+                                <input type="number" class="m-amount w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white" value="2000" placeholder="Amount (USDC)">
                             </div>
                             <div class="grid grid-cols-3 gap-3 text-xs font-mono">
                                 <div>
@@ -507,12 +507,12 @@
             </div>
             <div>
                 <label class="block text-xs uppercase font-mono text-zinc-400 mb-1">Reassign To Backup Freelancer</label>
-                <select id="relinquish-freelancer-select" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white"></select>
+                <select id="relinquish-freelancer-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white"></select>
             </div>
             <input type="hidden" id="modal-relinquish-milestone-index">
             <div class="flex justify-end space-x-2 pt-2">
                 <button onclick="closeModal('modal-relinquish')" class="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-xs font-bold">Cancel</button>
-                <button onclick="executeRelinquishment()" class="px-5 py-2 rounded-xl bg-white text-black text-xs font-extrabold uppercase tracking-wider">Execute Handoff</button>
+                <button id="execute-relinquishment-button" onclick="executeRelinquishment()" class="px-5 py-2 rounded-xl bg-white text-black text-xs font-extrabold uppercase tracking-wider">Execute Handoff</button>
             </div>
         </div>
     </div>
@@ -524,6 +524,9 @@
         let activeContractId = 'FWK-CONTRACT-101';
         let currentContract = null;
         let allFreelancers = [];
+        let companyContracts = [];
+        let refreshInProgress = false;
+        const currentCompanyId = {{ user.id|tojson }};
 
         function switchTab(tab) {
             ['tracker', 'applicants', 'postjob', 'blockchain'].forEach(t => {
@@ -540,36 +543,53 @@
         }
 
         async function refreshData() {
+            if (refreshInProgress) return;
+            refreshInProgress = true;
             try {
                 const resMe = await fetch('/api/me');
                 if (!resMe.ok) { window.location.href = '/login'; return; }
                 const meData = await resMe.json();
-                document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} FWK`;
+                document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} USDC`;
 
                 const resOverview = await fetch('/api/overview');
                 const overview = await resOverview.json();
-                document.getElementById('virtual-clock-display').innerText = overview.virtual_time_str;
-
                 const resF = await fetch('/api/freelancers');
                 const dataF = await resF.json();
                 allFreelancers = dataF.freelancers;
-                populateRelinquishSelect();
-
-                const resC = await fetch(`/api/contract/${activeContractId}`);
-                if (resC.ok) {
+                const resC = activeContractId
+                    ? await fetch(`/api/contract/${activeContractId}`)
+                    : null;
+                if (resC && resC.ok) {
                     const dataC = await resC.json();
                     currentContract = dataC.contract;
-                    renderContract(currentContract, overview.virtual_time);
+                    populateRelinquishSelect();
+                    renderContract(currentContract, overview.current_time);
+                    if (!document.getElementById('view-applicants').classList.contains('hidden')) {
+                        loadApplicantsData();
+                    }
                 }
             } catch (err) {
                 console.error(err);
+            } finally {
+                refreshInProgress = false;
             }
         }
 
         function populateRelinquishSelect() {
             const select = document.getElementById('relinquish-freelancer-select');
             select.innerHTML = '';
-            allFreelancers.forEach(f => {
+            const currentFreelancerId = currentContract && currentContract.current_freelancer_id;
+            const replacements = allFreelancers.filter(f => f.id !== currentFreelancerId);
+            if (!replacements.length) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.innerText = 'No replacement freelancer available';
+                select.appendChild(opt);
+                document.getElementById('execute-relinquishment-button').disabled = true;
+                return;
+            }
+            document.getElementById('execute-relinquishment-button').disabled = false;
+            replacements.forEach(f => {
                 const opt = document.createElement('option');
                 opt.value = f.id;
                 opt.innerText = `${f.name} — ${f.title} (Rating: ${f.rating})`;
@@ -582,9 +602,9 @@
             document.getElementById('contract-status-badge').innerText = c.status;
             document.getElementById('contract-title-display').innerText = c.title;
             document.getElementById('contract-desc-display').innerText = c.description;
-            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} FWK`;
-            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} FWK`;
-            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} FWK`;
+            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} USDC`;
+            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} USDC`;
+            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} USDC`;
             document.getElementById('tracker-freelancer-name').innerText = c.freelancer_name;
             document.getElementById('tracker-sc-address').innerText = c.smart_contract_address;
 
@@ -661,8 +681,8 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="text-right font-mono">
-                                <div class="text-xs font-bold text-white">${m.amount.toLocaleString()} FWK</div>
-                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-zinc-400">-${m.penalty_amount} FWK Late Penalty</div>` : ''}
+                                <div class="text-xs font-bold text-white">${m.amount.toLocaleString()} USDC</div>
+                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-zinc-400">-${m.penalty_amount} USDC Late Penalty</div>` : ''}
                             </div>
                             <div class="flex items-center gap-2">${actionHtml}</div>
                         </div>
@@ -685,7 +705,7 @@
                         <div class="text-[10px] text-zinc-500">${r.reason}</div>
                     </div>
                     <div class="text-right">
-                        <div class="text-white font-bold">${r.remaining_budget.toLocaleString()} FWK</div>
+                        <div class="text-white font-bold">${r.remaining_budget.toLocaleString()} USDC</div>
                         <div class="text-[10px] text-zinc-500">Remaining Budget</div>
                     </div>
                 `;
@@ -697,7 +717,12 @@
             if (!currentContract) return;
             const container = document.getElementById('applicants-list-container');
             container.innerHTML = '';
-            (currentContract.applications || []).forEach(app => {
+            const applications = currentContract.applications || [];
+            if (!applications.length) {
+                container.innerHTML = '<div class="mono-card p-5 rounded-xl text-sm text-zinc-400">No freelancer applications have been received for this contract yet.</div>';
+                return;
+            }
+            applications.forEach(app => {
                 const q = app.qualification_score || {};
                 const card = document.createElement('div');
                 card.className = 'mono-card p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4';
@@ -714,15 +739,60 @@
                             <span>Reputation: ${q.reputation_weight}/25</span>
                         </div>
                     </div>
-                    <button onclick="allotCandidate('${app.freelancer_id}')" class="px-4 py-2 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition">
-                        Allot & Start Contract
-                    </button>
+                    ${currentContract.status === 'OPEN'
+                        ? `<button onclick="allotCandidate('${app.freelancer_id}', this)" class="px-4 py-2 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition">Accept Freelancer & Start Contract</button>`
+                        : `<span class="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-xs font-bold uppercase tracking-wider">Contract ${currentContract.status}</span>`}
                 `;
                 container.appendChild(card);
             });
         }
 
-        async function allotCandidate(freelancerId) {
+        async function loadCompanyContracts() {
+            try {
+                const res = await fetch('/api/contracts');
+                if (!res.ok) throw new Error('Could not load contracts for this company.');
+                const data = await res.json();
+                companyContracts = data.contracts.filter(contract => contract.company_id === currentCompanyId);
+                const select = document.getElementById('company-contract-select');
+                select.innerHTML = '';
+                if (!companyContracts.length) {
+                    select.innerHTML = '<option value="">No company contracts found</option>';
+                    activeContractId = null;
+                    currentContract = null;
+                    document.getElementById('applicants-list-container').innerHTML =
+                        '<div class="mono-card p-5 rounded-xl text-sm text-zinc-400">Post a contract to start receiving freelancer applications.</div>';
+                    return;
+                }
+                companyContracts.forEach(contract => {
+                    const option = document.createElement('option');
+                    option.value = contract.id;
+                    option.textContent = `${contract.title} (${contract.status})`;
+                    select.appendChild(option);
+                });
+                if (!companyContracts.some(contract => contract.id === activeContractId)) {
+                    const openContract = companyContracts.find(contract => contract.status === 'OPEN');
+                    activeContractId = (openContract || companyContracts[0]).id;
+                }
+                select.value = activeContractId;
+            } catch (err) {
+                console.error('Failed to load company contracts:', err);
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function selectCompanyContract(contractId) {
+            if (!contractId || !companyContracts.some(contract => contract.id === contractId)) return;
+            activeContractId = contractId;
+            await refreshData();
+            loadApplicantsData();
+        }
+
+        async function allotCandidate(freelancerId, button) {
+            if (!currentContract || currentContract.status !== 'OPEN') {
+                showToast('Only an open contract can accept a freelancer.', 'error');
+                return;
+            }
+            if (button) button.disabled = true;
             try {
                 const res = await fetch(`/api/contracts/${activeContractId}/allot`, {
                     method: 'POST',
@@ -730,12 +800,35 @@
                     body: JSON.stringify({ freelancer_id: freelancerId })
                 });
                 const data = await res.json();
-                if (data.success) {
-                    showToast("Contract allotted to " + freelancerId);
+                if (res.ok && data.success) {
+                    showToast(`Success! ${data.freelancer_name} accepted and assigned to "${data.contract.title}".`, 'success');
+                    currentContract = data.contract;
                     switchTab('tracker');
-                    refreshData();
-                } else alert(data.error);
-            } catch (err) { alert(err); }
+                    await refreshData();
+                    await loadCompanyContracts();
+                } else {
+                    showToast(data.error || 'Could not accept this freelancer.', 'error');
+                    if (button) button.disabled = false;
+                }
+            } catch (err) {
+                console.error('Freelancer acceptance failed:', err);
+                showToast(`Acceptance failed: ${err.message}`, 'error');
+                if (button) button.disabled = false;
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) {
+                console.error('Toast container is missing:', message);
+                return;
+            }
+            const toast = document.createElement('div');
+            toast.setAttribute('role', 'status');
+            toast.className = `pointer-events-auto p-3 rounded-xl shadow-xl font-mono text-xs font-bold border ${type === 'error' ? 'bg-rose-950 text-rose-100 border-rose-700' : 'bg-white text-black border-zinc-300'}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            window.setTimeout(() => toast.remove(), 5000);
         }
 
         function openApproveModal(milestoneIndex) {
@@ -749,10 +842,10 @@
             }
             let payout = m.amount - penalty;
             document.getElementById('approve-breakdown-box').innerHTML = `
-                <div class="flex justify-between"><span>Milestone Base Budget:</span><span class="font-bold text-white">${m.amount.toLocaleString()} FWK</span></div>
-                <div class="flex justify-between text-zinc-400"><span>Late Penalty (${delay}h delay):</span><span>-${penalty.toFixed(2)} FWK</span></div>
-                <div class="border-t border-zinc-800 my-1 pt-1 flex justify-between font-bold text-white"><span>Net Freelancer Payout:</span><span>${payout.toFixed(2)} FWK</span></div>
-                <div class="flex justify-between text-zinc-500 text-[10px]"><span>Refund to Company:</span><span>${penalty.toFixed(2)} FWK</span></div>
+                <div class="flex justify-between"><span>Milestone Base Budget:</span><span class="font-bold text-white">${m.amount.toLocaleString()} USDC</span></div>
+                <div class="flex justify-between text-zinc-400"><span>Late Penalty (${delay}h delay):</span><span>-${penalty.toFixed(2)} USDC</span></div>
+                <div class="border-t border-zinc-800 my-1 pt-1 flex justify-between font-bold text-white"><span>Net Freelancer Payout:</span><span>${payout.toFixed(2)} USDC</span></div>
+                <div class="flex justify-between text-zinc-500 text-[10px]"><span>Refund to Company:</span><span>${penalty.toFixed(2)} USDC</span></div>
             `;
             document.getElementById('modal-approve').classList.remove('hidden');
         }
@@ -768,13 +861,22 @@
                 const data = await res.json();
                 if (data.success) {
                     closeModal('modal-approve');
-                    showToast(`Milestone approved! Payout: ${data.result.payout} FWK released.`);
+                    showToast(`Milestone approved! Payout: ${data.result.payout} USDC released.`);
                     refreshData();
                 } else alert(data.error);
             } catch (err) { alert(err); }
         }
 
         function openRelinquishModal(milestoneIndex) {
+            if (!currentContract) {
+                alert('Contract details are still loading. Please try again.');
+                return;
+            }
+            populateRelinquishSelect();
+            if (document.getElementById('execute-relinquishment-button').disabled) {
+                alert('No replacement freelancer is currently available.');
+                return;
+            }
             document.getElementById('modal-relinquish-milestone-index').value = milestoneIndex;
             document.getElementById('modal-relinquish').classList.remove('hidden');
         }
@@ -783,6 +885,10 @@
             const idx = parseInt(document.getElementById('modal-relinquish-milestone-index').value);
             const reason = document.getElementById('relinquish-reason-select').value;
             const newFreelancerId = document.getElementById('relinquish-freelancer-select').value;
+            if (!newFreelancerId) {
+                alert('Select an available replacement freelancer before continuing.');
+                return;
+            }
             try {
                 const res = await fetch(`/api/contracts/${activeContractId}/relinquish`, {
                     method: 'POST',
@@ -790,12 +896,12 @@
                     body: JSON.stringify({ milestone_index: idx, reason, new_freelancer_id: newFreelancerId })
                 });
                 const data = await res.json();
-                if (data.success) {
+                if (res.ok && data.success) {
                     closeModal('modal-relinquish');
                     showToast(`Task relinquished and reassigned to ${data.result.new_freelancer}. Prior work 100% protected.`);
-                    refreshData();
-                } else alert(data.error);
-            } catch (err) { alert(err); }
+                    await refreshData();
+                } else alert(data.error || 'The task could not be reassigned.');
+            } catch (err) { alert(`Handoff failed: ${err.message}`); }
         }
 
         async function handleCreateContract(e) {
@@ -819,12 +925,16 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast("Contract deployed & escrow locked!");
+                    showToast("Success! Your contract has been posted and escrow locked.", 'success');
                     activeContractId = data.contract.id;
+                    await loadCompanyContracts();
+                    await refreshData();
                     switchTab('tracker');
-                    refreshData();
-                } else alert(data.error);
-            } catch (err) { alert(err); }
+                } else showToast(data.error || 'Could not post the contract.', 'error');
+            } catch (err) {
+                console.error('Contract creation failed:', err);
+                showToast(`Contract creation failed: ${err.message}`, 'error');
+            }
         }
 
         async function loadBlockchainData() {
@@ -858,20 +968,9 @@
             refreshData();
         }
 
-        async function advanceTime(h) {
-            await fetch('/api/time/advance', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ hours: h })
-            });
-            showToast(`Time advanced +${h} hours`);
-            refreshData();
-        }
-
-        async function resetTime() {
-            await fetch('/api/time/reset', { method: 'POST' });
-            showToast("Clock reset to present");
-            refreshData();
+        function updateLocalClock() {
+            document.getElementById('real-clock-display').innerText =
+                new Date().toLocaleString();
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -1089,7 +1188,12 @@
             document.getElementById('modal-image-preview').classList.remove('hidden');
         }
 
-        document.addEventListener('DOMContentLoaded', refreshData);
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLocalClock();
+            setInterval(updateLocalClock, 1000);
+            loadCompanyContracts().then(refreshData);
+            setInterval(refreshData, 3000);
+        });
     </script>
     <script src="{{ url_for('static', filename='chat_rooms.js') }}"></script>
 </body>

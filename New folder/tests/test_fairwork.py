@@ -4,11 +4,23 @@ Tests Blockchain integrity, Smart Contract Escrows, Late Penalties, and Relinqui
 """
 
 import unittest
+import json
+import tempfile
 from unittest.mock import patch
 from backend.blockchain import Blockchain, Transaction, sha256_hash, compute_merkle_root
 from backend.models import FreelancerProfile, CompanyProfile, Milestone, JobContract
 from backend.fairwork_engine import FairworkEngine
 from backend.app import app, chat_store
+from backend.auth_store import AuthStore
+import backend.app as app_module
+
+
+def demo_login(client, username):
+    return client.post("/api/auth/login", json={
+        "username": username,
+        "password": "demo12345"
+    })
+
 
 class TestFairworkPlatform(unittest.TestCase):
     def setUp(self):
@@ -116,6 +128,179 @@ class TestFairworkPlatform(unittest.TestCase):
         # Crucial fairness check: Alex's paid balance from milestone 0 was NOT touched or revoked!
         self.assertEqual(self.engine.blockchain.get_wallet_balance(alex.wallet_address), alex_settled_balance)
 
+    def test_deliverable_api_requires_assigned_freelancer_and_content(self):
+        with patch.object(app_module, "engine", self.engine), \
+                patch("backend.db.DatabaseService.save_block_and_transactions"), \
+                patch("backend.db.DatabaseService.save_wallet_balance"), \
+                patch("backend.db.DatabaseService.save_contract"):
+            anonymous = app.test_client()
+            self.assertEqual(
+                anonymous.post("/api/contracts/FWK-CONTRACT-101/submit_deliverable", json={
+                    "milestone_index": 0,
+                    "deliverable_text": "Finished"
+                }).status_code,
+                401
+            )
+
+            company = app.test_client()
+            demo_login(company, "company_novatech")
+            self.assertEqual(
+                company.post("/api/contracts/FWK-CONTRACT-101/submit_deliverable", json={
+                    "milestone_index": 0,
+                    "deliverable_text": "Finished"
+                }).status_code,
+                403
+            )
+
+            freelancer = app.test_client()
+            demo_login(freelancer, "freelancer_alex")
+            empty_response = freelancer.post(
+                "/api/contracts/FWK-CONTRACT-101/submit_deliverable",
+                json={"milestone_index": 0, "deliverable_text": " ", "deliverable_link": ""}
+            )
+            self.assertEqual(empty_response.status_code, 400)
+
+            response = freelancer.post(
+                "/api/contracts/FWK-CONTRACT-101/submit_deliverable",
+                json={"milestone_index": 0, "deliverable_text": "Verified deliverable"}
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.get_json()["success"])
+            self.assertEqual(
+                self.engine.contracts["FWK-CONTRACT-101"].milestones[0].status,
+                "SUBMITTED"
+            )
+
+    def test_company_handoff_requires_a_different_replacement_freelancer(self):
+        with patch.object(app_module, "engine", self.engine), \
+                patch("backend.db.DatabaseService.save_block_and_transactions"), \
+                patch("backend.db.DatabaseService.save_wallet_balance"), \
+                patch("backend.db.DatabaseService.save_contract"):
+            company = app.test_client()
+            demo_login(company, "company_novatech")
+            url = "/api/contracts/FWK-CONTRACT-101/relinquish"
+
+            same_freelancer = company.post(url, json={
+                "milestone_index": 0,
+                "reason": "Reassign task",
+                "new_freelancer_id": "freelancer_alex"
+            })
+            self.assertEqual(same_freelancer.status_code, 400)
+
+            response = company.post(url, json={
+                "milestone_index": 0,
+                "reason": "Reassign remaining work",
+                "new_freelancer_id": "freelancer_priya"
+            })
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.get_json()["result"]["new_freelancer"], "Priya Sharma")
+            self.assertEqual(
+                self.engine.contracts["FWK-CONTRACT-101"].current_freelancer_id,
+                "freelancer_priya"
+            )
+            updated_contract = company.get("/api/contract/FWK-CONTRACT-101").get_json()["contract"]
+            self.assertEqual(updated_contract["current_freelancer_id"], "freelancer_priya")
+            self.assertEqual(updated_contract["freelancer_name"], "Priya Sharma")
+
+    def test_company_can_accept_an_applicant_for_its_open_contract(self):
+        contract = self.engine.contracts["FWK-CONTRACT-101"]
+        contract.status = "OPEN"
+        contract.current_freelancer_id = None
+        contract.milestones[0].status = "PENDING"
+        contract.milestones[0].assigned_freelancer_id = None
+        with patch.object(app_module, "engine", self.engine), \
+                patch("backend.db.DatabaseService.save_block_and_transactions"), \
+                patch("backend.db.DatabaseService.save_wallet_balance"), \
+                patch("backend.db.DatabaseService.save_contract"):
+            company = app.test_client()
+            demo_login(company, "company_novatech")
+            response = company.post(
+                "/api/contracts/FWK-CONTRACT-101/allot",
+                json={"freelancer_id": "freelancer_priya"}
+            )
+            self.assertEqual(response.status_code, 200)
+            result = response.get_json()
+            self.assertTrue(result["success"])
+            self.assertEqual(result["freelancer_name"], "Priya Sharma")
+            self.assertEqual(result["contract"]["current_freelancer_id"], "freelancer_priya")
+            self.assertEqual(result["contract"]["milestones"][0]["status"], "IN_PROGRESS")
+
+    def test_company_cannot_accept_for_another_company_or_a_non_applicant(self):
+        contract = self.engine.contracts["FWK-CONTRACT-101"]
+        contract.status = "OPEN"
+        with patch.object(app_module, "engine", self.engine):
+            anonymous = app.test_client()
+            self.assertEqual(
+                anonymous.post(
+                    "/api/contracts/FWK-CONTRACT-101/allot",
+                    json={"freelancer_id": "freelancer_priya"}
+                ).status_code,
+                401
+            )
+            other_company = app.test_client()
+            demo_login(other_company, "company_aurora")
+            self.assertEqual(
+                other_company.post(
+                    "/api/contracts/FWK-CONTRACT-101/allot",
+                    json={"freelancer_id": "freelancer_priya"}
+                ).status_code,
+                403
+            )
+            company = app.test_client()
+            demo_login(company, "company_novatech")
+            self.assertEqual(
+                company.post(
+                    "/api/contracts/FWK-CONTRACT-101/allot",
+                    json={"freelancer_id": "freelancer_marcus"}
+                ).status_code,
+                400
+            )
+
+    def test_engine_clock_reads_current_wall_time(self):
+        with patch("backend.fairwork_engine.time.time", return_value=1_800_000_000):
+            first_time = self.engine.get_virtual_time()
+        with patch("backend.fairwork_engine.time.time", return_value=1_800_000_005):
+            later_time = self.engine.get_virtual_time()
+        self.assertEqual(later_time - first_time, 5)
+
+    def test_time_travel_api_is_disabled(self):
+        with patch.object(app_module, "engine", self.engine):
+            advance_response = self.client.post("/api/time/advance", json={"hours": 24})
+            reset_response = self.client.post("/api/time/reset")
+        self.assertEqual(advance_response.status_code, 410)
+        self.assertEqual(reset_response.status_code, 410)
+        self.assertFalse(advance_response.get_json()["success"])
+        self.assertFalse(reset_response.get_json()["success"])
+
+    def test_company_and_freelancer_dashboards_label_balances_in_usdc(self):
+        with patch.object(app_module, "engine", self.engine):
+            company = app.test_client()
+            demo_login(company, "company_novatech")
+            company_page = company.get("/company")
+            self.assertEqual(company_page.status_code, 200)
+            self.assertIn(b"USDC", company_page.data)
+            self.assertIn(b"Local Time:", company_page.data)
+            self.assertIn(b"setInterval(refreshData, 3000)", company_page.data)
+            self.assertIn(b"function showToast(message, type = 'success')", company_page.data)
+            self.assertIn(b"Accept Freelancer", company_page.data)
+            self.assertNotRegex(
+                company_page.get_data(as_text=True),
+                r"\d[\d,]*(?:\.\d+)?\s+FWK\b"
+            )
+
+            freelancer = app.test_client()
+            demo_login(freelancer, "freelancer_alex")
+            freelancer_page = freelancer.get("/freelancer")
+            self.assertEqual(freelancer_page.status_code, 200)
+            self.assertIn(b"USDC", freelancer_page.data)
+            self.assertIn(b"Local Time:", freelancer_page.data)
+            self.assertIn(b"setInterval(refreshData, 3000)", freelancer_page.data)
+            self.assertIn(b"current_freelancer_id === currentUserId", freelancer_page.data)
+            self.assertNotRegex(
+                freelancer_page.get_data(as_text=True),
+                r"\d[\d,]*(?:\.\d+)?\s+FWK\b"
+            )
+
     def test_api_endpoints(self):
         # GET /api/overview
         res = self.client.get('/api/overview')
@@ -123,6 +308,8 @@ class TestFairworkPlatform(unittest.TestCase):
         data = res.get_json()
         self.assertTrue(data["is_chain_valid"])
         self.assertGreaterEqual(data["block_height"], 1)
+        self.assertIn("current_time", data)
+        self.assertIn("current_time_str", data)
 
         # GET /api/contracts
         res_c = self.client.get('/api/contracts')
@@ -136,7 +323,7 @@ class TestFairworkPlatform(unittest.TestCase):
         self.assertIn('/login', res_root.location)
 
         # 2. Login as Company
-        res_login_c = self.client.post('/api/auth/login', json={'user_id': 'company_novatech'})
+        res_login_c = demo_login(self.client, "company_novatech")
         self.assertEqual(res_login_c.status_code, 200)
         data_c = res_login_c.get_json()
         self.assertTrue(data_c['success'])
@@ -160,7 +347,7 @@ class TestFairworkPlatform(unittest.TestCase):
         self.assertEqual(res_logout.status_code, 302)
 
         # 4. Login as Freelancer
-        res_login_f = self.client.post('/api/auth/login', json={'user_id': 'freelancer_alex'})
+        res_login_f = demo_login(self.client, "freelancer_alex")
         self.assertEqual(res_login_f.status_code, 200)
         data_f = res_login_f.get_json()
         self.assertTrue(data_f['success'])
@@ -175,14 +362,88 @@ class TestFairworkPlatform(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         page = response.get_data(as_text=True)
         self.assertIn('id="view-signin"', page)
+        self.assertIn('id="signin-password"', page)
+        self.assertIn('id="reg-username"', page)
+        self.assertIn('id="reg-password"', page)
+        self.assertIn("function selectDemo(username)", page)
         self.assertIn("function handleSignin(event)", page)
         self.assertIn('id="auth-feedback"', page)
         self.assertIn('id="google_translate_element"', page)
         self.assertIn("translate.google.com/translate_a/element.js", page)
 
+    def test_login_requires_username_and_password(self):
+        missing_username = self.client.post("/api/auth/login", json={
+            "password": "demo12345"
+        })
+        self.assertEqual(missing_username.status_code, 400)
+
+        missing_password = self.client.post("/api/auth/login", json={
+            "username": "company_novatech"
+        })
+        self.assertEqual(missing_password.status_code, 400)
+
+        wrong_password = self.client.post("/api/auth/login", json={
+            "username": "company_novatech",
+            "password": "incorrect-password"
+        })
+        self.assertEqual(wrong_password.status_code, 401)
+
+        successful_login = demo_login(self.client, "company_novatech")
+        self.assertEqual(successful_login.status_code, 200)
+        self.assertEqual(successful_login.get_json()["user_id"], "company_novatech")
+
+    def test_registration_persists_hashed_credentials_and_rejects_duplicates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store_path = f"{directory}/accounts.json"
+            store = AuthStore(store_path)
+            payload = {
+                "role": "freelancer",
+                "name": "Test Freelancer",
+                "username": "New.Freelancer",
+                "password": "secure-pass-123",
+                "skills": "Python, Flask"
+            }
+            with patch.object(app_module, "auth_store", store), \
+                    patch.object(app_module, "engine", self.engine), \
+                    patch("backend.db.DatabaseService.save_wallet_balance"):
+                response = self.client.post("/api/auth/register", json=payload)
+                self.assertEqual(response.status_code, 201)
+                self.assertEqual(response.get_json()["username"], "New.Freelancer")
+
+                duplicate = self.client.post("/api/auth/register", json={
+                    **payload,
+                    "role": "company"
+                })
+                self.assertEqual(duplicate.status_code, 409)
+
+                with open(store_path, encoding="utf-8") as account_file:
+                    account_data = account_file.read()
+                self.assertNotIn(payload["password"], account_data)
+                account_record = json.loads(account_data)["new.freelancer"]
+                self.assertIn("password_hash", account_record)
+                self.assertTrue(
+                    AuthStore(store_path).authenticate(
+                        payload["username"],
+                        payload["password"]
+                    )
+                )
+
+                successful_login = self.client.post("/api/auth/login", json={
+                    "username": payload["username"],
+                    "password": payload["password"]
+                })
+                self.assertEqual(successful_login.status_code, 200)
+                self.assertEqual(successful_login.get_json()["user_id"], "freelancer_new.freelancer")
+
+                failed_login = self.client.post("/api/auth/login", json={
+                    "username": payload["username"],
+                    "password": "wrong-password"
+                })
+                self.assertEqual(failed_login.status_code, 401)
+
     def test_whatsapp_chat_messaging_and_image_storage(self):
         # 1. Login as Freelancer Alex
-        self.client.post('/api/auth/login', json={'user_id': 'freelancer_alex'})
+        demo_login(self.client, "freelancer_alex")
 
         # Send text + image message
         send_res = self.client.post('/api/chat/FWK-CONTRACT-101/send', json={
@@ -195,7 +456,7 @@ class TestFairworkPlatform(unittest.TestCase):
         self.assertIn('data:image/png', new_msg['image_data'])
 
         # 2. Login as Company NovaTech and read chat
-        self.client.post('/api/auth/login', json={'user_id': 'company_novatech'})
+        demo_login(self.client, "company_novatech")
         get_res = self.client.get('/api/chat/FWK-CONTRACT-101')
         self.assertEqual(get_res.status_code, 200)
         messages = get_res.get_json()['messages']
@@ -220,7 +481,7 @@ class TestFairworkPlatform(unittest.TestCase):
                 self.assertEqual(anonymous.get("/api/chat/rooms").status_code, 401)
 
                 company = app.test_client()
-                company.post("/api/auth/login", json={"user_id": "company_novatech"})
+                demo_login(company, "company_novatech")
                 private_response = company.post("/api/chat/rooms", json={
                     "name": "Project Planning",
                     "visibility": "private",
@@ -234,14 +495,14 @@ class TestFairworkPlatform(unittest.TestCase):
                 )
 
                 alex = app.test_client()
-                alex.post("/api/auth/login", json={"user_id": "freelancer_alex"})
+                demo_login(alex, "freelancer_alex")
                 self.assertEqual(
                     alex.get(f"/api/chat/rooms/{private_room['id']}").status_code,
                     200
                 )
 
                 priya = app.test_client()
-                priya.post("/api/auth/login", json={"user_id": "freelancer_priya"})
+                demo_login(priya, "freelancer_priya")
                 self.assertEqual(
                     priya.get(f"/api/chat/rooms/{private_room['id']}").status_code,
                     404

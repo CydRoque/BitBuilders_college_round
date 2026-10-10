@@ -4,6 +4,8 @@
 
 Fairwork connects companies with qualified freelancers using smart contract escrows, cryptographic milestone verification, an Amazon-style deliverable pipeline tracker, dynamic late penalty buffer calculations, and automated task relinquishment for complete fairness.
 
+> **Currency note:** Amounts are displayed in USDC, but this prototype uses an internal simulated ledger. It does not transfer or custody real USDC, connect to a token contract, or guarantee a USD peg.
+
 ---
 
 ## 🌟 Key Features
@@ -25,14 +27,17 @@ Fairwork connects companies with qualified freelancers using smart contract escr
    - Dedicated access-controlled routes:
      * `/company`: Accessible strictly to logged-in Companies.
      * `/freelancer`: Accessible strictly to logged-in Freelancers.
-     * `/login`: Monochrome portal with 1-click demo profiles or new registration.
+     * `/login`: Monochrome portal requiring username and password for sign-in and account registration.
+   - Account passwords are stored as hashes in `backend/auth_accounts.json` by default. Set `FAIRWORK_AUTH_STORE` to use a different path.
+   - Demo profiles use the password `demo12345`; selecting a demo profile fills the credentials into the sign-in form, which still requires submission.
 
 2. **Minimalist Black & White (Monochrome) UI**
    - High-contrast aesthetic with deep obsidian blacks (`#000000`, `#09090b`), pure whites (`#ffffff`), and subtle zinc accents.
    - Clean monochrome typography, borders, and progress indicators.
 
 3. **Dual Marketplace for Companies & Freelancers**
-   - Companies can post milestone-based job agreements with escrow deposits and view qualified talent.
+   - Companies can post milestone-based job agreements with escrow deposits, select their own contracts, review applicants, and accept a freelancer for an open contract.
+   - Successful acceptance confirms the freelancer's name and starts the first milestone; the company tracker refreshes with the new assignment.
    - Freelancers can browse open jobs, check required skills, and apply with verifiable credentials.
 
 4. **Public and Private Chat Rooms**
@@ -58,7 +63,8 @@ Fairwork connects companies with qualified freelancers using smart contract escr
      6. **Contract Completed** (Reputation rewarded and badges updated)
 
 4. **Deadline Buffer & Late Penalty Engine**
-   - Strict deadline tracking with configurable grace buffer periods.
+   - Deadlines and grace buffers are evaluated against the real system clock and dashboard times update live.
+   - Company and freelancer dashboards refresh assignment and contract status automatically.
    - On-time delivery guarantees 100% payout from escrow.
    - Delayed submissions within the buffer incur a transparent hourly penalty deduction refunded back to the company.
 
@@ -104,10 +110,7 @@ python -m unittest tests/test_fairwork.py
    - **👨‍💻 Alex Rivera (Freelancer 1)**: Submit deliverables for active milestones.
    - **👩‍💻 Priya Sharma (Freelancer 2 - Backup)**: Receive relinquished tasks and complete remaining work.
 
-2. **Use the Virtual Simulation Clock**:
-   - Click `+6h` or `+12h` to advance time smoothly.
-   - Click `+24h (Pass Deadline)` to observe the **late penalty deduction** in action.
-   - Click `+48h (Exceed Buffer)` to test the **automated relinquishment failover** to Freelancer 2!
+2. Contract deadline and reassignment behavior follows real elapsed time; test accelerated deadline cases with the automated test suite.
 
 3. **Check the Live Blockchain Explorer**:
    - Click the **Blockchain Explorer** tab to see SHA-256 block hashes, Merkle roots, and transaction signatures recorded for every action!

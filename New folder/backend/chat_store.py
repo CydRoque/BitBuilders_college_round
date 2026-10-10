@@ -114,7 +114,7 @@ class ChatStore:
                 "sender_id": "company_novatech",
                 "sender_name": "NovaTech Systems",
                 "sender_role": "company",
-                "text": "Hello Alex! Welcome to the Fairwork Escrow project. We have locked 6,000 FWK into the smart contract vault.",
+                "text": "Hello Alex! Welcome to the Fairwork Escrow project. We have locked 6,000 USDC into the smart contract vault.",
                 "image_data": None,
                 "timestamp": now - 3600,
                 "read_by": ["company_novatech", "freelancer_alex"]

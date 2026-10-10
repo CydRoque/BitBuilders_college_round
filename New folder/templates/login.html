@@ -82,7 +82,7 @@
         <div class="flex justify-center mb-6">
             <div class="bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex flex-wrap justify-center gap-1">
                 <button type="button" onclick="setAuthTab('quick')" id="tab-btn-quick" class="px-3 sm:px-5 py-2 text-xs font-bold rounded-lg bg-white text-black transition">
-                    1-Click Demo Profiles
+                    Demo Profiles
                 </button>
                 <button type="button" onclick="setAuthTab('register')" id="tab-btn-register" class="px-3 sm:px-5 py-2 text-xs font-bold rounded-lg text-zinc-400 hover:text-white transition">
                     Create New Account
@@ -103,7 +103,7 @@
                     </span>
 
                     <!-- NovaTech -->
-                    <div onclick="loginAs('company_novatech')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
+                    <div onclick="selectDemo('company_novatech')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-sm text-white">
@@ -117,7 +117,7 @@
                             <span class="text-xs font-mono px-2 py-1 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Company</span>
                         </div>
                         <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-400">
-                            <span>Balance: 25,000 FWK</span>
+                            <span>Balance: 25,000 USDC</span>
                             <span class="text-white group-hover:translate-x-1 transition flex items-center gap-1 font-bold">
                                 Enter Portal <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </span>
@@ -125,7 +125,7 @@
                     </div>
 
                     <!-- Aurora AI -->
-                    <div onclick="loginAs('company_aurora')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
+                    <div onclick="selectDemo('company_aurora')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-sm text-white">
@@ -139,7 +139,7 @@
                             <span class="text-xs font-mono px-2 py-1 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Company</span>
                         </div>
                         <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-400">
-                            <span>Balance: 15,000 FWK</span>
+                            <span>Balance: 15,000 USDC</span>
                             <span class="text-white group-hover:translate-x-1 transition flex items-center gap-1 font-bold">
                                 Enter Portal <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </span>
@@ -154,7 +154,7 @@
                     </span>
 
                     <!-- Alex Rivera -->
-                    <div onclick="loginAs('freelancer_alex')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
+                    <div onclick="selectDemo('freelancer_alex')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-sm text-white">
@@ -176,7 +176,7 @@
                     </div>
 
                     <!-- Priya Sharma (Rescue / Backup) -->
-                    <div onclick="loginAs('freelancer_priya')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
+                    <div onclick="selectDemo('freelancer_priya')" class="mono-card mono-card-hover p-5 rounded-2xl cursor-pointer transition group">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-sm text-white">
@@ -199,6 +199,11 @@
                 </div>
             </div>
 
+            <div class="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-xs text-zinc-300">
+                Demo accounts also require credentials. Select a profile to fill the sign-in form.
+                <span class="block mt-1 font-mono text-zinc-400">Demo password: <strong class="text-white">demo12345</strong></span>
+            </div>
+
             <!-- Simultaneous sessions explainer -->
             <div class="mono-card p-4 rounded-xl border border-zinc-800 text-xs text-zinc-400 flex items-center gap-3">
                 <i class="fa-solid fa-circle-nodes text-white text-lg"></i>
@@ -208,20 +213,24 @@
             </div>
         </div>
 
-<!-- VIEW 3: Sign In Existing Account -->
-<div id="view-signin" class="hidden mono-card p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-6">
-    <div>
-        <h2 class="text-xl font-bold text-white uppercase tracking-tight">Sign In</h2>
-        <p class="mt-1 text-xs text-zinc-400">Enter your existing account ID or profile name to continue.</p>
-    </div>
-    <form id="signin-form" onsubmit="handleSignin(event)" class="space-y-4">
-        <div>
-            <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1" for="signin-id">User ID or Name</label>
-            <input type="text" id="signin-id" required autocomplete="username" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="e.g. company_novatech or Alex Rivera">
+        <!-- VIEW 3: Sign In Existing Account -->
+        <div id="view-signin" class="hidden mono-card p-6 sm:p-8 rounded-2xl border border-zinc-800 space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-white uppercase tracking-tight">Sign In</h2>
+                <p class="mt-1 text-xs text-zinc-400">Enter both your username and password.</p>
+            </div>
+            <form id="signin-form" onsubmit="handleSignin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1" for="signin-id">Username</label>
+                    <input type="text" id="signin-id" required autocomplete="username" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="Your username">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1" for="signin-password">Password</label>
+                    <input type="password" id="signin-password" required autocomplete="current-password" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="Your password">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-extrabold text-sm uppercase tracking-wider hover:bg-zinc-200 transition">Sign In</button>
+            </form>
         </div>
-        <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-extrabold text-sm uppercase tracking-wider hover:bg-zinc-200 transition">Sign In</button>
-    </form>
-</div>
 <!-- END VIEW 3 -->
 
         <!-- VIEW 2: Register New Account -->
@@ -250,6 +259,17 @@
                     <input type="text" id="reg-name" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="e.g. Apex Cryptography Labs or Marcus Vance">
                 </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1" for="reg-username">Username</label>
+                        <input type="text" id="reg-username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_.-]{3,32}" autocomplete="username" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="3–32 letters, numbers, . _ -">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1" for="reg-password">Password</label>
+                        <input type="password" id="reg-password" required minlength="8" autocomplete="new-password" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="At least 8 characters">
+                    </div>
+                </div>
+
                 <div id="company-fields">
                     <label class="block text-xs uppercase font-mono font-bold text-zinc-400 mb-1">Industry / Domain</label>
                     <input type="text" id="reg-industry" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none" placeholder="e.g. DeFi, Cloud Infrastructure, AI Systems" value="Blockchain Architecture">
@@ -267,7 +287,7 @@
                 </div>
 
                 <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-extrabold text-sm uppercase tracking-wider hover:bg-zinc-200 transition">
-                    Create Profile & Sign In
+                    Create Account & Sign In
                 </button>
             </form>
         </div>
@@ -347,13 +367,26 @@
             });
         });
 
-        async function loginAs(userId) {
+        function selectDemo(username) {
+            document.getElementById('signin-id').value = username;
+            document.getElementById('signin-password').value = 'demo12345';
+            setAuthTab('signin');
+        }
+
+        async function handleSignin(event) {
+            event.preventDefault();
             clearAuthFeedback();
+            const username = document.getElementById('signin-id').value.trim();
+            const password = document.getElementById('signin-password').value;
+            if (!username || !password) {
+                showAuthFeedback('Enter both your username and password.');
+                return;
+            }
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ user_id: userId })
+                    body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
                 if (res.ok && data.success) {
@@ -366,22 +399,13 @@
             }
         }
 
-        async function handleSignin(event) {
-            event.preventDefault();
-            clearAuthFeedback();
-            const userId = document.getElementById('signin-id').value.trim();
-            if (!userId) {
-                showAuthFeedback('Enter your account ID or name.');
-                return;
-            }
-            await loginAs(userId);
-        }
-
         async function handleRegister(e) {
             e.preventDefault();
             clearAuthFeedback();
             const role = document.querySelector('input[name="reg-role"]:checked').value;
             const name = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value;
             const industry = document.getElementById('reg-industry').value;
             const title = document.getElementById('reg-title').value;
             const skills = document.getElementById('reg-skills').value;
@@ -391,7 +415,7 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        role, name, industry, title, skills
+                        role, name, username, password, industry, title, skills
                     })
                 });
                 const data = await res.json();

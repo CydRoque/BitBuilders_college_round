@@ -145,38 +145,16 @@
             </div>
         </div>
 
-        <!-- SIMULATED TIME BAR -->
+        <!-- Live local time -->
         <div class="bg-gray-950/90 border-t border-b border-gray-800/80 px-4 py-2 text-xs">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center space-x-3">
                     <span class="inline-flex items-center gap-1.5 text-amber-400 font-semibold">
-                        <i class="fa-regular fa-clock"></i> Virtual Simulation Clock:
+                        <i class="fa-regular fa-clock"></i> Local Time:
                     </span>
-                    <span id="virtual-clock-display" class="font-mono text-gray-200 bg-gray-900 px-2.5 py-1 rounded border border-gray-800 font-medium">
+                    <span id="real-clock-display" class="font-mono text-gray-200 bg-gray-900 px-2.5 py-1 rounded border border-gray-800 font-medium">
                         --
                     </span>
-                    <span class="text-[11px] text-gray-400 hidden lg:inline">
-                        (Simulate time passage to test deadlines, late penalties, and buffer relinquishment)
-                    </span>
-                </div>
-
-                <!-- Time Travel Controls -->
-                <div class="flex items-center space-x-1.5">
-                    <button onclick="advanceTime(6)" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 font-mono text-[11px] font-semibold border border-gray-700 transition">
-                        +6h
-                    </button>
-                    <button onclick="advanceTime(12)" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 font-mono text-[11px] font-semibold border border-gray-700 transition">
-                        +12h
-                    </button>
-                    <button onclick="advanceTime(24)" class="px-2.5 py-1 rounded bg-amber-900/40 hover:bg-amber-800/60 text-amber-300 font-mono text-[11px] font-semibold border border-amber-700/50 transition" title="Exceed deadline - triggers late fee penalty">
-                        +24h (Pass Deadline)
-                    </button>
-                    <button onclick="advanceTime(48)" class="px-2.5 py-1 rounded bg-rose-900/40 hover:bg-rose-800/60 text-rose-300 font-mono text-[11px] font-semibold border border-rose-700/50 transition" title="Exceed buffer - triggers relinquishment failover">
-                        +48h (Exceed Buffer)
-                    </button>
-                    <button onclick="resetTime()" class="px-2 py-1 rounded bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white font-mono text-[11px] border border-gray-800 transition" title="Reset virtual clock">
-                        <i class="fa-solid fa-rotate-left"></i> Reset
-                    </button>
                 </div>
             </div>
         </div>
@@ -234,17 +212,17 @@
                     <div class="flex items-center gap-4 bg-gray-950/70 p-4 rounded-xl border border-gray-800">
                         <div class="text-center px-2">
                             <div class="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Total Budget</div>
-                            <div id="contract-budget-display" class="text-lg font-black font-mono text-white">0 FWK</div>
+                            <div id="contract-budget-display" class="text-lg font-black font-mono text-white">0 USDC</div>
                         </div>
                         <div class="h-8 w-px bg-gray-800"></div>
                         <div class="text-center px-2">
                             <div class="text-[10px] text-emerald-400 uppercase tracking-wider font-mono">Locked in Escrow</div>
-                            <div id="contract-escrow-display" class="text-lg font-black font-mono text-emerald-400">0 FWK</div>
+                            <div id="contract-escrow-display" class="text-lg font-black font-mono text-emerald-400">0 USDC</div>
                         </div>
                         <div class="h-8 w-px bg-gray-800"></div>
                         <div class="text-center px-2">
                             <div class="text-[10px] text-indigo-400 uppercase tracking-wider font-mono">Paid to Freelancers</div>
-                            <div id="contract-released-display" class="text-lg font-black font-mono text-indigo-400">0 FWK</div>
+                            <div id="contract-released-display" class="text-lg font-black font-mono text-indigo-400">0 USDC</div>
                         </div>
                     </div>
                 </div>
@@ -555,7 +533,7 @@
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <input type="text" class="m-title w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white" placeholder="Title" value="Architecture & Core Implementation">
-                                    <input type="number" class="m-amount w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white" placeholder="Amount (FWK)" value="1500" required>
+                                    <input type="number" class="m-amount w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white" placeholder="Amount (USDC)" value="1500" required>
                                 </div>
                                 <div class="grid grid-cols-3 gap-3">
                                     <div>
@@ -700,6 +678,7 @@
         let currentPersona = 'company_novatech'; // company_novatech, freelancer_alex, freelancer_priya
         let activeContractId = 'FWK-CONTRACT-101';
         let currentContract = null;
+        let refreshInProgress = false;
         let allFreelancers = [];
         let allCompanies = [];
 
@@ -746,11 +725,12 @@
 
         // Fetch Overview & Contract
         async function refreshData() {
+            if (refreshInProgress) return;
+            refreshInProgress = true;
             try {
                 // 1. Overview
                 const resOverview = await fetch('/api/overview');
                 const overview = await resOverview.json();
-                document.getElementById('virtual-clock-display').innerText = overview.virtual_time_str;
                 document.getElementById('block-height-badge').innerText = `#${overview.block_height}`;
                 
                 // 2. Freelancers & Companies for balance & names
@@ -771,17 +751,19 @@
                     const fl = allFreelancers.find(f => f.id === currentPersona);
                     if (fl) myBalance = fl.wallet_balance;
                 }
-                document.getElementById('user-wallet-balance').innerText = `${myBalance.toLocaleString()} FWK`;
+                document.getElementById('user-wallet-balance').innerText = `${myBalance.toLocaleString()} USDC`;
 
                 // 3. Contract Detail
                 const resContract = await fetch(`/api/contract/${activeContractId}`);
                 if (resContract.ok) {
                     const dataContract = await resContract.json();
                     currentContract = dataContract.contract;
-                    renderContractView(currentContract, overview.virtual_time);
+                    renderContractView(currentContract, overview.current_time);
                 }
             } catch (err) {
                 console.error("Error refreshing data:", err);
+            } finally {
+                refreshInProgress = false;
             }
         }
 
@@ -792,9 +774,9 @@
             document.getElementById('contract-title-display').innerText = c.title;
             document.getElementById('contract-desc-display').innerText = c.description;
 
-            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} FWK`;
-            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} FWK`;
-            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} FWK`;
+            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} USDC`;
+            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} USDC`;
+            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} USDC`;
 
             document.getElementById('tracker-company-name').innerText = c.company_name;
             document.getElementById('tracker-freelancer-name').innerText = c.freelancer_name;
@@ -925,8 +907,8 @@
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div class="text-right">
                                 <div class="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Milestone Amount</div>
-                                <div class="text-md font-bold font-mono text-white">${m.amount.toLocaleString()} FWK</div>
-                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-rose-400 font-mono">-${m.penalty_amount} FWK Late Penalty</div>` : ''}
+                                <div class="text-md font-bold font-mono text-white">${m.amount.toLocaleString()} USDC</div>
+                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-rose-400 font-mono">-${m.penalty_amount} USDC Late Penalty</div>` : ''}
                             </div>
                             <div class="flex items-center gap-2">
                                 ${actionsHtml}
@@ -956,7 +938,7 @@
                         <div class="text-[11px] text-gray-400">Reason: ${r.reason}</div>
                     </div>
                     <div class="text-right">
-                        <span class="font-mono text-emerald-400 font-bold">${r.remaining_budget.toLocaleString()} FWK</span>
+                        <span class="font-mono text-emerald-400 font-bold">${r.remaining_budget.toLocaleString()} USDC</span>
                         <div class="text-[10px] text-gray-400">Prorated Remaining Allotment</div>
                     </div>
                 `;
@@ -1002,7 +984,7 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="font-mono font-bold text-white">${tx.amount > 0 ? `${tx.amount} FWK` : 'State Sync'}</div>
+                                    <div class="font-mono font-bold text-white">${tx.amount > 0 ? `${tx.amount} USDC` : 'State Sync'}</div>
                                     <div class="text-[10px] font-mono text-gray-500">${tx.signature}</div>
                                 </div>
                             </div>
@@ -1239,7 +1221,7 @@
                                 </div>
                                 <div class="text-right">
                                     <span class="text-[10px] text-gray-500 uppercase font-mono">Escrow Budget</span>
-                                    <div class="font-mono font-bold text-emerald-400">${c.total_budget.toLocaleString()} FWK</div>
+                                    <div class="font-mono font-bold text-emerald-400">${c.total_budget.toLocaleString()} USDC</div>
                                 </div>
                             </div>
                         </div>
@@ -1309,30 +1291,9 @@
             }
         }
 
-        // Time Simulation Functions
-        async function advanceTime(hours) {
-            try {
-                const res = await fetch('/api/time/advance', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ hours })
-                });
-                const data = await res.json();
-                showToast(`Advanced time +${hours} hours`, "info");
-                refreshData();
-            } catch (err) {
-                console.error("Error advancing time:", err);
-            }
-        }
-
-        async function resetTime() {
-            try {
-                await fetch('/api/time/reset', { method: 'POST' });
-                showToast("Reset simulation clock to present", "info");
-                refreshData();
-            } catch (err) {
-                console.error("Error resetting time:", err);
-            }
+        function updateLocalClock() {
+            document.getElementById('real-clock-display').innerText =
+                new Date().toLocaleString();
         }
 
         // Modal Helpers
@@ -1398,20 +1359,20 @@
             box.innerHTML = `
                 <div class="flex justify-between">
                     <span class="text-gray-400">Milestone Base Budget:</span>
-                    <span class="text-white font-mono font-bold">${m.amount.toLocaleString()} FWK</span>
+                    <span class="text-white font-mono font-bold">${m.amount.toLocaleString()} USDC</span>
                 </div>
                 <div class="flex justify-between text-rose-400">
                     <span>Late Penalty Deduction (${delay}h delay):</span>
-                    <span class="font-mono font-bold">-${penalty.toFixed(2)} FWK</span>
+                    <span class="font-mono font-bold">-${penalty.toFixed(2)} USDC</span>
                 </div>
                 <div class="h-px bg-gray-800 my-1"></div>
                 <div class="flex justify-between text-emerald-400 font-bold">
                     <span>Net Freelancer Payout:</span>
-                    <span class="font-mono text-sm">${payout.toFixed(2)} FWK</span>
+                    <span class="font-mono text-sm">${payout.toFixed(2)} USDC</span>
                 </div>
                 <div class="flex justify-between text-indigo-400 text-[11px]">
                     <span>Refunded to Company Wallet:</span>
-                    <span class="font-mono">${penalty.toFixed(2)} FWK</span>
+                    <span class="font-mono">${penalty.toFixed(2)} USDC</span>
                 </div>
             `;
             document.getElementById('modal-approve').classList.remove('hidden');
@@ -1431,7 +1392,7 @@
                 const data = await res.json();
                 if (data.success) {
                     closeModal('modal-approve');
-                    showToast(`Milestone approved! Payout: ${data.result.payout} FWK released via Smart Contract.`, "success");
+                    showToast(`Milestone approved! Payout: ${data.result.payout} USDC released via Smart Contract.`, "success");
                     refreshData();
                 } else {
                     showToast(data.error, "error");
@@ -1502,7 +1463,7 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input type="text" class="m-title w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white" placeholder="Title" value="Deliverable #${milestoneRowCount}">
-                    <input type="number" class="m-amount w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white" placeholder="Amount (FWK)" value="1000" required>
+                    <input type="number" class="m-amount w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white" placeholder="Amount (USDC)" value="1000" required>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     <div>
@@ -1601,8 +1562,11 @@
 
         // Initial Boot
         document.addEventListener('DOMContentLoaded', () => {
+            updateLocalClock();
+            setInterval(updateLocalClock, 1000);
             refreshData();
             loadFreelancersData();
+            setInterval(refreshData, 3000);
         });
     </script>
 </body>

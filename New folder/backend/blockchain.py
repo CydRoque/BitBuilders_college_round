@@ -171,7 +171,7 @@ class Blockchain:
         if tx.sender != "0x0000000000000000000000000000000000000000" and not tx.sender.startswith("0xFAIRWORK_PROTOCOL"):
             sender_bal = self.get_wallet_balance(tx.sender)
             if sender_bal < tx.amount:
-                raise ValueError(f"Insufficient funds in wallet {tx.sender}: balance is {sender_bal} FWK, requested {tx.amount} FWK")
+                raise ValueError(f"Insufficient funds in wallet {tx.sender}: balance is {sender_bal} USDC, requested {tx.amount} USDC")
             # Deduct immediately to prevent double spending in mempool
             self.set_wallet_balance(tx.sender, sender_bal - tx.amount)
 
