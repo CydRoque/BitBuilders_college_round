@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fairwork — Freelancer Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .mono-card {
+            background-color: #09090b;
+            border: 1px solid #27272a;
+        }
+        .mono-card-hover:hover {
+            border-color: #ffffff;
+        }
+        /* Amazon Tracker High-Contrast Monochrome */
+        .tracker-step-active {
+            border-color: #ffffff;
+            background-color: #ffffff;
+            color: #000000;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+        .tracker-step-done {
+            border-color: #ffffff;
+            background-color: #18181b;
+            color: #ffffff;
+        }
+        .tracker-step-pending {
+            border-color: #27272a;
+            background-color: #09090b;
+            color: #71717a;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-white selection:text-black">
+
+    <!-- Top Global Monochrome Header -->
+    <header class="sticky top-0 z-50 bg-black/90 backdrop-blur border-b border-zinc-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded bg-white text-black flex items-center justify-center font-black text-sm">
+                    FW
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-base font-black tracking-wider uppercase text-white">FAIRWORK</span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">FREELANCER PORTAL</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Freelancer Info & Balance -->
+            <div class="flex items-center space-x-3">
+                <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono">
+                    <span class="text-zinc-400">My Balance:</span>
+                    <span id="user-wallet-balance" class="font-bold text-white">Loading...</span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono">
+                    <span class="text-zinc-400">Reputation:</span>
+                    <span class="font-bold text-white">{{ user.reputation_score }}/1000</span>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold text-white hidden md:inline">{{ user.name }}</span>
+                    <a href="/logout" class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-mono font-bold text-zinc-300 hover:text-white transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Time Bar -->
+        <div class="bg-zinc-950 border-t border-b border-zinc-900 px-4 py-2 text-xs">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-3 font-mono">
+                    <span class="text-zinc-400"><i class="fa-regular fa-clock text-white"></i> Virtual Clock:</span>
+                    <span id="virtual-clock-display" class="text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 font-bold">--</span>
+                </div>
+
+                <div class="flex items-center space-x-1.5">
+                    <button onclick="advanceTime(6)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[11px] border border-zinc-800 transition">+6h</button>
+                    <button onclick="advanceTime(12)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-mono text-[11px] border border-zinc-800 transition">+12h</button>
+                    <button onclick="advanceTime(24)" class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[11px] border border-zinc-700 transition" title="Pass deadline">+24h (Deadline)</button>
+                    <button onclick="advanceTime(48)" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-[11px] border border-white transition font-bold" title="Breach buffer">+48h (Buffer Breach)</button>
+                    <button onclick="resetTime()" class="px-2 py-1 rounded bg-zinc-950 hover:bg-zinc-900 text-zinc-400 font-mono text-[11px] border border-zinc-800 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub Navigation Tabs -->
+    <div class="bg-zinc-950 border-b border-zinc-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-2 py-2 overflow-x-auto">
+                <button onclick="switchTab('myjobs')" id="tab-myjobs" class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 bg-white text-black shadow-sm">
+                    <i class="fa-solid fa-briefcase"></i> My Assigned Jobs & Deliverables
+                </button>
+                <button onclick="switchTab('market')" id="tab-market" class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <i class="fa-solid fa-magnifying-glass"></i> Job Marketplace (Browse & Apply)
+                </button>
+                <button onclick="switchTab('blockchain')" id="tab-blockchain" class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <i class="fa-solid fa-cubes"></i> Blockchain Ledger & Proofs
+                </button>
+                <button onclick="switchTab('chat')" id="tab-chat" class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <i class="fa-brands fa-whatsapp text-white"></i> WhatsApp Chat Room
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- TAB 1: MY ASSIGNED JOBS & AMAZON TRACKER -->
+        <section id="view-myjobs" class="space-y-6">
+            <!-- Active Contract Card -->
+            <div class="mono-card rounded-2xl p-6 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2 font-mono text-xs">
+                            <span class="px-2 py-0.5 rounded bg-zinc-800 text-white border border-zinc-700" id="contract-id-badge">
+                                FWK-CONTRACT-101
+                            </span>
+                            <span class="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800" id="contract-status-badge">
+                                ALLOTTED TO ME
+                            </span>
+                        </div>
+                        <h1 id="contract-title-display" class="text-2xl font-black text-white uppercase tracking-tight">
+                            Loading contract...
+                        </h1>
+                        <p id="contract-desc-display" class="text-xs text-zinc-400 mt-1 max-w-3xl">--</p>
+                    </div>
+
+                    <!-- Payout Pill -->
+                    <div class="flex items-center gap-4 bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <div class="text-center px-2">
+                            <div class="text-[10px] text-zinc-500 uppercase font-mono">Contract Budget</div>
+                            <div id="contract-budget-display" class="text-base font-bold font-mono text-white">0 FWK</div>
+                        </div>
+                        <div class="h-6 w-px bg-zinc-800"></div>
+                        <div class="text-center px-2">
+                            <div class="text-[10px] text-zinc-500 uppercase font-mono">In Escrow Vault</div>
+                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-white">0 FWK</div>
+                        </div>
+                        <div class="h-6 w-px bg-zinc-800"></div>
+                        <div class="text-center px-2">
+                            <div class="text-[10px] text-zinc-500 uppercase font-mono">Paid to Me</div>
+                            <div id="contract-released-display" class="text-base font-bold font-mono text-zinc-300">0 FWK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                    <div class="flex items-center space-x-6">
+                        <div>
+                            <span class="text-zinc-500">Client / Company: </span>
+                            <span id="tracker-company-name" class="font-bold text-white">NovaTech Systems</span>
+                        </div>
+                        <div>
+                            <span class="text-zinc-500">Contract Vault: </span>
+                            <span id="tracker-sc-address" class="text-zinc-400">0xSC_...</span>
+                        </div>
+                    </div>
+                    <div class="text-zinc-400">
+                        Punctuality Guarantee: 100% Payout on on-time delivery
+                    </div>
+                </div>
+            </div>
+
+            <!-- AMAZON PRODUCT DELIVERY PROGRESS TRACKER -->
+            <div class="mono-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-route"></i> Delivery Pipeline Progress
+                    </h2>
+                    <span id="pipeline-current-state-text" class="text-xs font-mono text-zinc-400 font-bold">
+                        Stage 3 / 6
+                    </span>
+                </div>
+
+                <div class="relative py-4 px-2">
+                    <div class="absolute top-1/2 left-8 right-8 -translate-y-1/2 h-1 bg-zinc-800 rounded-full z-0">
+                        <div id="tracker-progress-fill" class="h-full bg-white rounded-full transition-all duration-700" style="width: 50%;"></div>
+                    </div>
+
+                    <div class="relative z-10 grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+                        <div id="step-node-1" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-done"><i class="fa-solid fa-lock"></i></div>
+                            <span class="text-[11px] font-bold text-zinc-300 mt-2 uppercase">1. Escrow Locked</span>
+                        </div>
+                        <div id="step-node-2" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-done"><i class="fa-solid fa-user-check"></i></div>
+                            <span class="text-[11px] font-bold text-zinc-300 mt-2 uppercase">2. Allotted</span>
+                        </div>
+                        <div id="step-node-3" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-active"><i class="fa-solid fa-code"></i></div>
+                            <span class="text-[11px] font-bold text-white mt-2 uppercase">3. In Execution</span>
+                        </div>
+                        <div id="step-node-4" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending"><i class="fa-solid fa-fingerprint"></i></div>
+                            <span class="text-[11px] font-bold text-zinc-500 mt-2 uppercase">4. Submitted</span>
+                        </div>
+                        <div id="step-node-5" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending"><i class="fa-solid fa-coins"></i></div>
+                            <span class="text-[11px] font-bold text-zinc-500 mt-2 uppercase">5. Released</span>
+                        </div>
+                        <div id="step-node-6" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending"><i class="fa-solid fa-check-double"></i></div>
+                            <span class="text-[11px] font-bold text-zinc-500 mt-2 uppercase">6. Completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-400 flex items-center justify-between">
+                    <span id="tracker-status-description">Milestone active. Submit deliverable to claim escrow release.</span>
+                    <span id="tracker-stage-timestamp">Cryptographic Delivery Tracking</span>
+                </div>
+            </div>
+
+            <!-- Milestones Submissions Cards -->
+            <div class="space-y-4">
+                <h3 class="text-sm font-black uppercase text-white tracking-wider">Milestone Execution & Submission</h3>
+                <div id="milestones-container" class="space-y-3">
+                    <div class="text-center py-6 text-zinc-500 text-xs font-mono">Loading milestones...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: JOB MARKETPLACE -->
+        <section id="view-market" class="hidden space-y-6">
+            <div>
+                <h2 class="text-lg font-black uppercase text-white tracking-wider">Explore Open Contracts</h2>
+                <p class="text-xs text-zinc-400">View client jobs with automated milestone escrow and algorithmic qualification matching.</p>
+            </div>
+
+            <div id="market-contracts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- TAB 3: BLOCKCHAIN EXPLORER -->
+        <section id="view-blockchain" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-black uppercase text-white tracking-wider">Blockchain Ledger & Cryptographic Proofs</h2>
+                    <p class="text-xs text-zinc-400">Every deliverable submission generates a verifiable SHA-256 hash sealed in PoW blocks.</p>
+                </div>
+            </div>
+            <div id="blocks-stream-container" class="space-y-4"></div>
+        </section>
+
+        <!-- TAB 4: WHATSAPP-STYLE REAL-TIME CHAT -->
+        <section id="view-chat" class="hidden space-y-4">
+            <div class="mono-card rounded-2xl overflow-hidden border border-zinc-800 flex flex-col md:flex-row h-[660px]">
+                <!-- Left Sidebar: Conversations / Contracts list -->
+                <div class="w-full md:w-80 border-r border-zinc-800 flex flex-col bg-zinc-950">
+                    <div class="p-3 border-b border-zinc-800 flex items-center justify-between">
+                        <span class="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> Direct Chats
+                        </span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300">Live Sync</span>
+                    </div>
+                    <div class="p-2 border-b border-zinc-900">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-500 text-xs"></i>
+                            <input type="text" id="chat-search" placeholder="Search conversations..." class="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none">
+                        </div>
+                    </div>
+                    <div id="chat-conversations-list" class="flex-1 overflow-y-auto divide-y divide-zinc-900">
+                        <div class="p-4 text-center text-xs text-zinc-500 font-mono">Loading chats...</div>
+                    </div>
+                </div>
+
+                <!-- Right Main Chat Pane -->
+                <div class="flex-1 flex flex-col bg-black relative">
+                    <!-- Chat Top Header -->
+                    <div class="p-3 px-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-white">
+                                <span id="chat-header-avatar">NT</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span id="chat-header-name" class="text-xs font-bold text-white">NovaTech Systems</span>
+                                    <span class="w-2 h-2 rounded-full bg-white animate-pulse" title="Online"></span>
+                                </div>
+                                <div class="text-[10px] font-mono text-zinc-400">
+                                    Contract #<span id="chat-header-contract">FWK-CONTRACT-101</span> • Verified Escrow Channel
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 text-zinc-400 text-sm">
+                            <button onclick="showToast('Initiating encrypted voice channel...')" class="hover:text-white" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
+                            <button onclick="showToast('Initiating encrypted video room...')" class="hover:text-white" title="Video Call"><i class="fa-solid fa-video"></i></button>
+                            <button onclick="switchTab('myjobs')" class="hover:text-white" title="My Assigned Jobs"><i class="fa-solid fa-briefcase"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages Feed -->
+                    <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#070709] relative" style="background-image: radial-gradient(#1c1c20 1px, transparent 1px); background-size: 20px 20px;">
+                        <div class="flex justify-center my-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+                                Today • Escrow-Secured Messaging
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Staged Image Preview Bar -->
+                    <div id="chat-image-preview-bar" class="hidden p-2.5 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <img id="chat-staged-img-preview" class="w-12 h-12 object-cover rounded-lg border border-zinc-700">
+                            <div>
+                                <div class="text-xs text-white font-bold" id="chat-staged-img-name">Image attached</div>
+                                <div class="text-[10px] text-zinc-400">Click send to upload and deliver to client</div>
+                            </div>
+                        </div>
+                        <button onclick="clearStagedImage()" class="text-zinc-400 hover:text-white text-xs px-2.5 py-1 bg-zinc-800 rounded-lg">
+                            <i class="fa-solid fa-xmark"></i> Remove
+                        </button>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="p-3 bg-zinc-950 border-t border-zinc-800 flex items-center space-x-2">
+                        <input type="file" id="chat-file-input" accept="image/*" class="hidden" onchange="handleImageFileSelected(event)">
+                        
+                        <button onclick="document.getElementById('chat-file-input').click()" class="p-2 text-zinc-400 hover:text-white transition" title="Attach Image File">
+                            <i class="fa-solid fa-paperclip text-sm"></i>
+                        </button>
+                        <button onclick="promptImageUrl()" class="p-2 text-zinc-400 hover:text-white transition" title="Paste Image Web URL">
+                            <i class="fa-regular fa-image text-sm"></i>
+                        </button>
+
+                        <input type="text" id="chat-text-input" placeholder="Type a message to company client..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-white font-sans" onkeydown="if(event.key === 'Enter') sendChatMessage()">
+
+                        <button onclick="sendChatMessage()" class="p-2.5 px-4 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition flex items-center gap-1.5">
+                            <span>Send</span> <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FULLSCREEN IMAGE VIEWER MODAL -->
+    <div id="modal-image-preview" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="relative max-w-4xl w-full flex flex-col items-center">
+            <button onclick="closeModal('modal-image-preview')" class="absolute -top-10 right-0 text-white bg-zinc-900 p-2 rounded-full hover:bg-zinc-800 text-sm">
+                <i class="fa-solid fa-xmark"></i> Close
+            </button>
+            <img id="modal-preview-img-element" class="max-h-[82vh] max-w-full rounded-2xl border border-zinc-700 shadow-2xl object-contain bg-zinc-950">
+            <span id="modal-preview-caption" class="text-xs text-zinc-400 font-mono mt-3"></span>
+        </div>
+    </div>
+
+    <!-- MODAL: SUBMIT DELIVERABLE -->
+    <div id="modal-submit" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="mono-card max-w-md w-full rounded-2xl p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-black uppercase text-white tracking-wider">Submit Milestone Deliverable</h3>
+                <button onclick="closeModal('modal-submit')" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-zinc-400">
+                Your work will be hashed with SHA-256 and verified against the contract deadline.
+            </p>
+            <div>
+                <label class="block text-xs uppercase font-mono text-zinc-400 mb-1">Milestone</label>
+                <input type="text" id="modal-submit-milestone-title" disabled class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-400">
+                <input type="hidden" id="modal-submit-milestone-index">
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-mono text-zinc-400 mb-1">Deliverable Details / Commit Notes</label>
+                <textarea id="modal-submit-text" rows="3" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:border-white focus:outline-none" placeholder="Explain what was built, test coverage, and documentation..."></textarea>
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-mono text-zinc-400 mb-1">Code Repository or Artifact Link</label>
+                <input type="text" id="modal-submit-link" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:border-white focus:outline-none" placeholder="https://github.com/project/release/v1.0">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modal-submit')" class="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-xs font-bold">Cancel</button>
+                <button onclick="executeDeliverableSubmission()" class="px-5 py-2 rounded-xl bg-white text-black text-xs font-extrabold uppercase tracking-wider">Generate Proof & Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        let activeContractId = 'FWK-CONTRACT-101';
+        let currentContract = null;
+
+        let chatInterval = null;
+        let stagedImageData = null;
+        let lastRenderedMsgCount = -1;
+
+        function switchTab(tab) {
+            ['myjobs', 'market', 'blockchain', 'chat'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    btn.className = t === tab 
+                        ? 'tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 bg-white text-black shadow-sm'
+                        : 'tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition';
+                }
+            });
+            if (tab === 'blockchain') loadBlockchainData();
+            if (tab === 'market') loadMarketContracts();
+            if (tab === 'chat') {
+                initChat();
+            } else {
+                if (chatInterval) clearInterval(chatInterval);
+            }
+        }
+
+        async function refreshData() {
+            try {
+                const resMe = await fetch('/api/me');
+                if (!resMe.ok) { window.location.href = '/login'; return; }
+                const meData = await resMe.json();
+                document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} FWK`;
+
+                const resOverview = await fetch('/api/overview');
+                const overview = await resOverview.json();
+                document.getElementById('virtual-clock-display').innerText = overview.virtual_time_str;
+
+                const resC = await fetch(`/api/contract/${activeContractId}`);
+                if (resC.ok) {
+                    const dataC = await resC.json();
+                    currentContract = dataC.contract;
+                    renderContract(currentContract, overview.virtual_time);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderContract(c, virtualTime) {
+            document.getElementById('contract-id-badge').innerText = c.id;
+            document.getElementById('contract-status-badge').innerText = c.status;
+            document.getElementById('contract-title-display').innerText = c.title;
+            document.getElementById('contract-desc-display').innerText = c.description;
+            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} FWK`;
+            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} FWK`;
+            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} FWK`;
+            document.getElementById('tracker-company-name').innerText = c.company_name;
+            document.getElementById('tracker-sc-address').innerText = c.smart_contract_address;
+
+            // Stepper
+            const stage = c.tracker_stage || 1;
+            document.getElementById('pipeline-current-state-text').innerText = `Stage ${stage} / 6`;
+            document.getElementById('tracker-status-description').innerText = c.tracker_stage_label;
+            const pct = Math.min(100, Math.round(((stage - 1) / 5) * 100));
+            document.getElementById('tracker-progress-fill').style.width = `${pct}%`;
+
+            for (let i = 1; i <= 6; i++) {
+                const node = document.getElementById(`step-node-${i}`);
+                if (!node) continue;
+                const circle = node.querySelector('div');
+                if (i < stage) circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-done';
+                else if (i === stage) circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-active';
+                else circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending';
+            }
+
+            // Render milestones
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
+            c.milestones.forEach((m, idx) => {
+                const isCurrent = (idx === c.current_milestone_index && c.status !== 'COMPLETED');
+                const card = document.createElement('div');
+                card.className = `mono-card rounded-xl p-5 ${isCurrent ? 'border-white' : 'border-zinc-800'}`;
+
+                let isLate = false;
+                let isOverBuffer = false;
+                let delayHours = 0;
+                if (m.deadline_timestamp && m.status === 'IN_PROGRESS' && virtualTime > m.deadline_timestamp) {
+                    isLate = true;
+                    delayHours = Math.round((virtualTime - m.deadline_timestamp) / 3600);
+                    if (virtualTime > m.buffer_expiry_timestamp) isOverBuffer = true;
+                }
+
+                let badgeHtml = '';
+                if (m.status === 'APPROVED') badgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-white border border-zinc-700">COMPLETED & PAID</span>';
+                else if (m.status === 'RELINQUISHED') badgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">REASSIGNED</span>';
+                else if (isOverBuffer) badgeHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white text-black font-bold">BUFFER EXPIRED (+${delayHours}h LATE)</span>`;
+                else if (isLate) badgeHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-white border border-zinc-700">LATE (+${delayHours}h) - PENALTY APPLIED</span>`;
+                else if (m.status === 'SUBMITTED') badgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white text-black font-bold">SUBMITTED & UNDER REVIEW</span>';
+                else badgeHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-400 border border-zinc-800">DEADLINE: ${m.deadline_hours}h</span>`;
+
+                let actionHtml = '';
+                if (m.status === 'IN_PROGRESS' || m.status === 'SUBMITTED') {
+                    actionHtml = `<button onclick="openSubmitModal(${m.index}, '${m.title}')" class="px-4 py-2 rounded-lg bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition">
+                        ${m.status === 'SUBMITTED' ? 'Update Submission' : 'Submit Deliverable'}
+                    </button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-white">${m.title}</span>
+                                ${badgeHtml}
+                            </div>
+                            <p class="text-xs text-zinc-400">${m.description}</p>
+                            ${m.deliverable_hash ? `<div class="mt-2 text-[10px] font-mono text-zinc-400 bg-zinc-950 p-1.5 rounded border border-zinc-800">Proof Hash: ${m.deliverable_hash}</div>` : ''}
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right font-mono">
+                                <div class="text-xs font-bold text-white">${m.amount.toLocaleString()} FWK</div>
+                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-zinc-400">-${m.penalty_amount} FWK Penalty</div>` : ''}
+                            </div>
+                            <div>${actionHtml}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function loadMarketContracts() {
+            try {
+                const res = await fetch('/api/contracts');
+                const data = await res.json();
+                const container = document.getElementById('market-contracts-grid');
+                container.innerHTML = '';
+                data.contracts.forEach(c => {
+                    const card = document.createElement('div');
+                    card.className = 'mono-card p-5 rounded-2xl space-y-3';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center text-xs font-mono">
+                            <span class="px-2 py-0.5 rounded bg-zinc-800 text-white">${c.id}</span>
+                            <span class="text-zinc-400">${c.status}</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white">${c.title}</h4>
+                        <p class="text-xs text-zinc-400 line-clamp-2">${c.description}</p>
+                        <div class="flex justify-between items-center pt-2 border-t border-zinc-800 text-xs font-mono">
+                            <span class="text-zinc-500">${c.company_name}</span>
+                            <span class="text-white font-bold">${c.total_budget} FWK</span>
+                        </div>
+                        <button onclick="applyToContract('${c.id}')" class="w-full py-2 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition">
+                            Apply for Job
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function applyToContract(contractId) {
+            try {
+                const res = await fetch(`/api/contracts/${contractId}/apply`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ proposal_text: "Qualified blockchain engineer with verified milestone delivery record." })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Applied successfully! Match: ${data.application.qualification_score.match_percentage}%`);
+                } else alert(data.error);
+            } catch (err) { alert(err); }
+        }
+
+        function openSubmitModal(milestoneIndex, title) {
+            document.getElementById('modal-submit-milestone-index').value = milestoneIndex;
+            document.getElementById('modal-submit-milestone-title').value = title;
+            document.getElementById('modal-submit').classList.remove('hidden');
+        }
+
+        async function executeDeliverableSubmission() {
+            const idx = parseInt(document.getElementById('modal-submit-milestone-index').value);
+            const text = document.getElementById('modal-submit-text').value;
+            const link = document.getElementById('modal-submit-link').value;
+            try {
+                const res = await fetch(`/api/contracts/${activeContractId}/submit_deliverable`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ milestone_index: idx, deliverable_text: text, deliverable_link: link })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal('modal-submit');
+                    showToast("Deliverable proof submitted and recorded on blockchain!");
+                    refreshData();
+                } else alert(data.error);
+            } catch (err) { alert(err); }
+        }
+
+        async function loadBlockchainData() {
+            try {
+                const res = await fetch('/api/blockchain');
+                const data = await res.json();
+                const container = document.getElementById('blocks-stream-container');
+                container.innerHTML = '';
+                [...data.chain].reverse().forEach(b => {
+                    const blockCard = document.createElement('div');
+                    blockCard.className = 'mono-card p-5 rounded-xl space-y-2 font-mono text-xs';
+                    blockCard.innerHTML = `
+                        <div class="flex justify-between items-center pb-2 border-b border-zinc-800">
+                            <span class="font-bold text-white uppercase">Block #${b.index}</span>
+                            <span class="text-zinc-500">Nonce: ${b.nonce}</span>
+                        </div>
+                        <div class="text-[11px] truncate text-zinc-400">Hash: <span class="text-white">${b.hash}</span></div>
+                        <div class="text-[11px] truncate text-zinc-500">Prev: ${b.previous_hash}</div>
+                        <div class="text-[11px] truncate text-zinc-500">Merkle Root: ${b.merkle_root}</div>
+                        <div class="text-[10px] text-zinc-400 pt-1">Transactions (${b.tx_count}) recorded on-chain</div>
+                    `;
+                    container.appendChild(blockCard);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function advanceTime(h) {
+            await fetch('/api/time/advance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ hours: h })
+            });
+            showToast(`Time advanced +${h} hours`);
+            refreshData();
+        }
+
+        async function resetTime() {
+            await fetch('/api/time/reset', { method: 'POST' });
+            showToast("Clock reset to present");
+            refreshData();
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function showToast(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'p-3 rounded-xl bg-white text-black font-mono text-xs font-bold border shadow-xl';
+            t.innerText = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        async function initChat() {
+            await loadConversations();
+            await fetchChatMessages();
+            if (chatInterval) clearInterval(chatInterval);
+            chatInterval = setInterval(fetchChatMessages, 1500); // 1.5s real-time sync
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/chat/conversations');
+                const data = await res.json();
+                const list = document.getElementById('chat-conversations-list');
+                list.innerHTML = '';
+
+                data.conversations.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = `p-3.5 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-between ${c.contract_id === activeContractId ? 'bg-zinc-900 border-l-2 border-white' : ''}`;
+                    item.onclick = () => {
+                        activeContractId = c.contract_id;
+                        lastRenderedMsgCount = -1;
+                        loadConversations();
+                        fetchChatMessages();
+                    };
+
+                    const counterpartName = c.counterpart_name || "Company Client";
+                    const initials = counterpartName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+
+                    item.innerHTML = `
+                        <div class="flex items-center space-x-3 truncate">
+                            <div class="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-white flex-shrink-0">
+                                ${initials}
+                            </div>
+                            <div class="truncate">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-white truncate">${counterpartName}</h4>
+                                </div>
+                                <p class="text-[11px] text-zinc-400 truncate mt-0.5">${c.last_message || 'No messages'}</p>
+                                <span class="text-[9px] font-mono text-zinc-500 uppercase">${c.contract_id}</span>
+                            </div>
+                        </div>
+                        ${c.unread_count > 0 ? `<span class="px-1.5 py-0.5 rounded-full bg-white text-black text-[9px] font-bold font-mono">${c.unread_count}</span>` : ''}
+                    `;
+                    list.appendChild(item);
+                });
+
+                if (currentContract) {
+                    document.getElementById('chat-header-name').innerText = currentContract.company_name || 'Client';
+                    document.getElementById('chat-header-avatar').innerText = (currentContract.company_name || 'CO').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+                    document.getElementById('chat-header-contract').innerText = activeContractId;
+                }
+            } catch (err) {
+                console.error("Error loading conversations:", err);
+            }
+        }
+
+        async function fetchChatMessages() {
+            try {
+                const res = await fetch(`/api/chat/${activeContractId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                if (data.messages.length !== lastRenderedMsgCount) {
+                    lastRenderedMsgCount = data.messages.length;
+                    renderChatMessages(data.messages, data.current_user_id);
+                }
+            } catch (err) {
+                console.error("Chat poll error:", err);
+            }
+        }
+
+        function renderChatMessages(messages, currentUserId) {
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML = `
+                <div class="flex justify-center my-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+                        Today • Escrow-Secured Messaging
+                    </span>
+                </div>
+            `;
+
+            messages.forEach(msg => {
+                const isMe = (msg.sender_id === currentUserId);
+                const bubble = document.createElement('div');
+                bubble.className = `flex flex-col max-w-[75%] sm:max-w-[65%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`;
+
+                const timeStr = new Date(msg.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                let imgHtml = '';
+                if (msg.image_data) {
+                    imgHtml = `
+                        <div class="mb-1.5 overflow-hidden rounded-xl border ${isMe ? 'border-zinc-300' : 'border-zinc-700'} relative group cursor-pointer" onclick="openImageModal('${msg.image_data}', '${msg.sender_name}')">
+                            <img src="${msg.image_data}" class="max-h-56 w-auto object-cover rounded-xl transition group-hover:scale-105">
+                            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-mono font-bold">
+                                <i class="fa-solid fa-expand mr-1.5"></i> Click to Enlarge
+                            </div>
+                        </div>
+                    `;
+                }
+
+                bubble.innerHTML = `
+                    <div class="p-3 px-3.5 rounded-2xl text-xs ${isMe ? 'bg-white text-black rounded-tr-none' : 'bg-[#18181b] text-white border border-zinc-800 rounded-tl-none'} shadow-md space-y-1">
+                        ${!isMe ? `<div class="text-[10px] font-bold text-zinc-400 font-mono">${msg.sender_name}</div>` : ''}
+                        ${imgHtml}
+                        ${msg.text ? `<div class="leading-relaxed font-sans">${escapeHtml(msg.text)}</div>` : ''}
+                        <div class="flex items-center justify-end space-x-1 text-[9px] font-mono ${isMe ? 'text-zinc-600' : 'text-zinc-500'} pt-0.5">
+                            <span>${timeStr}</span>
+                            <span>${isMe ? '<i class="fa-solid fa-check-double text-[9px] text-zinc-800"></i>' : ''}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(bubble);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        async function sendChatMessage() {
+            const textInput = document.getElementById('chat-text-input');
+            const text = textInput.value.trim();
+            const imagePayload = stagedImageData;
+
+            if (!text && !imagePayload) return;
+
+            try {
+                const res = await fetch(`/api/chat/${activeContractId}/send`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        text: text,
+                        image_data: imagePayload
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    textInput.value = '';
+                    clearStagedImage();
+                    await fetchChatMessages();
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                console.error("Error sending message:", err);
+            }
+        }
+
+        function handleImageFileSelected(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                stagedImageData = evt.target.result;
+                document.getElementById('chat-staged-img-preview').src = stagedImageData;
+                document.getElementById('chat-staged-img-name').innerText = file.name;
+                document.getElementById('chat-image-preview-bar').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function promptImageUrl() {
+            const url = prompt("Enter or paste public image URL:");
+            if (url && url.trim()) {
+                stagedImageData = url.trim();
+                document.getElementById('chat-staged-img-preview').src = stagedImageData;
+                document.getElementById('chat-staged-img-name').innerText = "Image from Web URL";
+                document.getElementById('chat-image-preview-bar').classList.remove('hidden');
+            }
+        }
+
+        function clearStagedImage() {
+            stagedImageData = null;
+            document.getElementById('chat-file-input').value = '';
+            document.getElementById('chat-image-preview-bar').classList.add('hidden');
+        }
+
+        function openImageModal(imgSrc, sender) {
+            document.getElementById('modal-preview-img-element').src = imgSrc;
+            document.getElementById('modal-preview-caption').innerText = `Sent by ${sender} • Fairwork Escrow Room`;
+            document.getElementById('modal-image-preview').classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', refreshData);
+    </script>
+</body>
+</html>
