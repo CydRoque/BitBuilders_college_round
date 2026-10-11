@@ -1,0 +1,94 @@
+[
+  {
+    "id": "51746089-55b4-48df-ac60-d6ccfdcec51a",
+    "contract_id": "FWK-CONTRACT-101",
+    "room_id": "FWK-CONTRACT-101::freelancer_alex",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "OWO",
+    "image_data": null,
+    "timestamp": 1791661663.300602,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech"
+    ]
+  },
+  {
+    "id": "0d28e4cc-c2ce-400e-bf3f-a5d781e76636",
+    "contract_id": "PUBLIC",
+    "room_id": "public::general",
+    "sender_id": "company_novatech",
+    "sender_name": "NovaTech Decentralized Systems",
+    "sender_role": "company",
+    "text": "Welcome to the Fairwork Public Lounge! Feel free to discuss contracts or create new public/private rooms.",
+    "image_data": null,
+    "timestamp": 1791689250.2295327,
+    "read_by": [
+      "company_novatech",
+      "user_freelancer_101",
+      "freelancer_alex"
+    ]
+  },
+  {
+    "id": "0bf8e5a3-8b37-4f92-a9ef-9364b4efe8b6",
+    "contract_id": "FWK-CONTRACT-101",
+    "room_id": "FWK-CONTRACT-101::freelancer_alex",
+    "sender_id": "company_novatech",
+    "sender_name": "NovaTech Decentralized Systems",
+    "sender_role": "company",
+    "text": "meow",
+    "image_data": null,
+    "timestamp": 1791690217.9405377,
+    "read_by": [
+      "company_novatech",
+      "freelancer_alex"
+    ]
+  },
+  {
+    "id": "99b87e5f-3646-4438-8861-c49597baed96",
+    "contract_id": "PUBLIC",
+    "room_id": "public::solidity_auditors_guild_700172",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Public channel 'Solidity Auditors Guild' created by Alex Rivera. Open to all Fairwork members.",
+    "image_data": null,
+    "timestamp": 1791692927.1097908,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech",
+      "freelancer_krrish"
+    ]
+  },
+  {
+    "id": "97865f10-dc58-4101-bed0-25c5fba9fb6a",
+    "contract_id": "PRIVATE",
+    "room_id": "private::direct_sync__alex___nova_4503fb",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Private room 'Direct Sync: Alex & NovaTech' created by Alex Rivera.",
+    "image_data": null,
+    "timestamp": 1791692927.1195374,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech"
+    ]
+  },
+  {
+    "id": "1ea0040c-04b2-422e-b818-fab6ba4b36c6",
+    "contract_id": "PRIVATE",
+    "room_id": "private::direct_sync__alex___nova_4503fb",
+    "sender_id": "freelancer_alex",
+    "sender_name": "Alex Rivera",
+    "sender_role": "freelancer",
+    "text": "Hello NovaTech team!",
+    "image_data": null,
+    "timestamp": 1791692927.1297197,
+    "read_by": [
+      "freelancer_alex",
+      "company_novatech"
+    ]
+  }
+]

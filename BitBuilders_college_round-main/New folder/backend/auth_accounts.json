@@ -1,0 +1,91 @@
+{
+  "company_novatech": {
+    "user_id": "company_novatech",
+    "role": "company",
+    "name": "NovaTech Decentralized Systems",
+    "industry": "Fintech & Web3 Infrastructure",
+    "title": "",
+    "skills": [],
+    "hourly_rate": 75.0,
+    "username": "company_novatech",
+    "password_hash": "scrypt:32768:8:1$xXYI071olBET27G1$7510fbeec05106c6aa7157d8d9ed155c4b3a4cafb46a9f3e8fa26850eea43a0a2cd667d72b6ac4b0c2fbcc72f7fcc1e247635b2183a0e609ff243d2b5e25e0d6"
+  },
+  "company_aurora": {
+    "user_id": "company_aurora",
+    "role": "company",
+    "name": "Aurora AI & Robotics",
+    "industry": "Machine Learning & Edge IoT",
+    "title": "",
+    "skills": [],
+    "hourly_rate": 75.0,
+    "username": "company_aurora",
+    "password_hash": "scrypt:32768:8:1$T6B0fUsog6WufRcu$55bde7707dd5babf0571b25e6b6e4e4dd1ddaac672d352d3e7418e745aacdebb386a0c239c1409a6122e07a71a51c67ee797de226cb5c834cfbcf58b88f83f08"
+  },
+  "freelancer_alex": {
+    "user_id": "freelancer_alex",
+    "role": "freelancer",
+    "name": "Alex Rivera",
+    "industry": "",
+    "title": "Senior Smart Contract & Rust Engineer",
+    "skills": [
+      "Solidity",
+      "Rust",
+      "Smart Contracts",
+      "Cryptography",
+      "DeFi Architecture"
+    ],
+    "hourly_rate": 95.0,
+    "username": "freelancer_alex",
+    "password_hash": "scrypt:32768:8:1$QCiEK8VULHlj1Zvl$c6edb801e60f0ff66a3b29b782800365def3850b9b35fe75e1b4a53c71059c2ba42544b09239b59e5569d6532e0a0442c12e236299d2a00b205777da914f9f67"
+  },
+  "freelancer_priya": {
+    "user_id": "freelancer_priya",
+    "role": "freelancer",
+    "name": "Priya Sharma",
+    "industry": "",
+    "title": "Full-Stack Web3 & Security Specialist",
+    "skills": [
+      "Solidity",
+      "Python",
+      "React",
+      "Smart Contracts",
+      "REST APIs",
+      "TypeScript"
+    ],
+    "hourly_rate": 80.0,
+    "username": "freelancer_priya",
+    "password_hash": "scrypt:32768:8:1$ceGZO3nKJJElBUPM$205fca8d858a6c9485be01b15dc7213c6da5e16774ca913af22a8c960aa051d5b279f4ecde9f825a0f22b4219eed7890e79ea44144cfd0c8fb0af1badb75d120"
+  },
+  "freelancer_marcus": {
+    "user_id": "freelancer_marcus",
+    "role": "freelancer",
+    "name": "Marcus Vance",
+    "industry": "",
+    "title": "DeFi Protocol & Tokenomics Engineer",
+    "skills": [
+      "Python",
+      "Solidity",
+      "Financial Modeling",
+      "Data Analysis",
+      "Security Auditing"
+    ],
+    "hourly_rate": 85.0,
+    "username": "freelancer_marcus",
+    "password_hash": "scrypt:32768:8:1$CXAgwESlDVSTOBDZ$d3282f490de6a546465091406d973d8f6a2e3c54463645c1821dd589be3dee361b2d056c127cc21f6e03a2a6a6edeba7c732937959d60a0fae187b85c1b6725e"
+  },
+  "supercyd": {
+    "user_id": "freelancer_supercyd",
+    "role": "freelancer",
+    "name": "Cyd",
+    "industry": "",
+    "title": "Project manager",
+    "skills": [
+      "Python",
+      "Postgres",
+      "SQL Alchemy"
+    ],
+    "hourly_rate": 75.0,
+    "username": "supercyd",
+    "password_hash": "scrypt:32768:8:1$kyQwQw0vvEPQgmOv$8593d94c2bea4ac920c231848f586cfb71f9a7c2ba24599053cdd1351fce084756d2fdadaa93c77a460352e7758531b1c04dcf60521faa65803aa3c3cf874349"
+  }
+}

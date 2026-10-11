@@ -1,0 +1,57 @@
+{
+  "public::general": {
+    "room_id": "public::general",
+    "name": "General Platform Lounge",
+    "description": "Public discussion channel for all registered companies and freelancers",
+    "channel_type": "public",
+    "created_by": "system",
+    "created_by_name": "Fairwork Official",
+    "participants": [],
+    "created_at": 1791685573.6914868
+  },
+  "public::marketplace": {
+    "room_id": "public::marketplace",
+    "name": "Contract Opportunities & Q&A",
+    "description": "Public channel to discuss open contracts, milestone scopes, and skills",
+    "channel_type": "public",
+    "created_by": "system",
+    "created_by_name": "Fairwork Official",
+    "participants": [],
+    "created_at": 1791685773.6914868
+  },
+  "public::disputes_help": {
+    "room_id": "public::disputes_help",
+    "name": "Escrow & Verification Support",
+    "description": "Public forum for SHA-256 deliverable verification and escrow questions",
+    "channel_type": "public",
+    "created_by": "system",
+    "created_by_name": "Fairwork Official",
+    "participants": [],
+    "created_at": 1791685973.6914868
+  },
+  "public::solidity_auditors_guild_700172": {
+    "room_id": "public::solidity_auditors_guild_700172",
+    "name": "Solidity Auditors Guild",
+    "description": "Smart contract security discussions",
+    "channel_type": "public",
+    "created_by": "freelancer_alex",
+    "created_by_name": "Alex Rivera",
+    "participants": [],
+    "contract_id": "PUBLIC",
+    "created_at": 1791692927.107795
+  },
+  "private::direct_sync__alex___nova_4503fb": {
+    "room_id": "private::direct_sync__alex___nova_4503fb",
+    "name": "Direct Sync: Alex & NovaTech",
+    "description": "Private encrypted room",
+    "channel_type": "private",
+    "created_by": "freelancer_alex",
+    "created_by_name": "Alex Rivera",
+    "participants": [
+      "freelancer_alex",
+      "company_novatech"
+    ],
+    "contract_id": "PRIVATE",
+    "created_at": 1791692927.1195374
+  }
+}

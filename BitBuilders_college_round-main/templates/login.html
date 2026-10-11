@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fairwork — Login &amp; Authentication Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #1a1a2e;
+        }
+        h1, h2, h3, .serif { font-family: 'Source Serif 4', serif; }
+        .gov-header {
+            background: #1a3a5c;
+            border-bottom: 4px solid #c8102e;
+        }
+        .gov-nav {
+            background: #2a4a6c;
+            border-bottom: 1px solid #1a3a5c;
+        }
+        .gov-card {
+            background: #ffffff;
+            border: 1px solid #d1d9e0;
+            border-top: 3px solid #1a3a5c;
+        }
+        .gov-card-interactive {
+            background: #ffffff;
+            border: 1px solid #d1d9e0;
+            border-left: 4px solid #1a3a5c;
+            transition: all 0.2s ease;
+        }
+        .gov-card-interactive:hover {
+            border-left-color: #c8102e;
+            box-shadow: 0 2px 12px rgba(26,58,92,0.12);
+            transform: translateY(-1px);
+        }
+        .gov-btn-primary {
+            background: #1a3a5c;
+            color: #ffffff;
+            border: 1px solid #1a3a5c;
+            transition: background 0.2s;
+        }
+        .gov-btn-primary:hover { background: #2a4a6c; }
+        .gov-btn-secondary {
+            background: #ffffff;
+            color: #1a3a5c;
+            border: 1px solid #1a3a5c;
+        }
+        .gov-tab-active {
+            background: #1a3a5c;
+            color: #ffffff;
+            border-bottom: 2px solid #c8102e;
+        }
+        .gov-tab-inactive {
+            background: #e8edf2;
+            color: #4a6a8c;
+            border-bottom: 2px solid transparent;
+        }
+        .gov-tab-inactive:hover { background: #d0dae5; }
+        .gov-input {
+            background: #f8f9fb;
+            border: 1px solid #b0bec5;
+            color: #1a1a2e;
+        }
+        .gov-input:focus {
+            outline: none;
+            border-color: #1a3a5c;
+            background: #ffffff;
+            box-shadow: 0 0 0 2px rgba(26,58,92,0.15);
+        }
+        .badge-role {
+            background: #e8edf2;
+            color: #1a3a5c;
+            border: 1px solid #b0bec5;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .seal-icon {
+            width: 48px; height: 48px;
+            background: #ffffff;
+            border: 2px solid #c8102e;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #1a3a5c;
+            font-weight: 900;
+            font-size: 14px;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f2f5; }
+        ::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Government Header -->
+    <header class="gov-header">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="seal-icon">FW</div>
+                <div>
+                    <div class="text-white font-bold text-lg tracking-wide" style="font-family:'Source Serif 4',serif;">FAIRWORK</div>
+                    <div class="text-blue-200 text-xs font-medium tracking-wider uppercase">Milestone-Based Escrow Platform</div>
+                </div>
+            </div>
+            <div class="text-blue-200 text-xs hidden sm:block font-medium">
+                <i class="fa-solid fa-shield-halved mr-1"></i> Verifiable · Transparent · Fair
+            </div>
+        </div>
+    </header>
+
+    <!-- Secondary nav bar -->
+    <div class="gov-nav py-1.5 px-4">
+        <div class="max-w-6xl mx-auto text-xs text-blue-200 font-medium flex items-center gap-2">
+            <i class="fa-solid fa-house text-[10px]"></i>
+            <span class="text-blue-300">Home</span>
+            <span class="text-blue-400 mx-1">/</span>
+            <span>Authentication Portal</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
+
+        <!-- Page Title Block -->
+        <div class="mb-8 pb-5 border-b-2 border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-1 h-8 bg-red-700 rounded"></div>
+                <h1 class="text-2xl font-bold text-gray-800 serif">Platform Access Portal</h1>
+            </div>
+            <p class="text-sm text-gray-500 ml-4">
+                Access your designated workspace. Companies and Freelancers operate under isolated, role-based sessions.
+            </p>
+        </div>
+
+        <!-- Auth Navigation Tabs -->
+        <div class="flex mb-6 border border-gray-300 rounded overflow-hidden w-fit">
+            <button onclick="setAuthTab('quick')" id="tab-btn-quick" class="px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-active transition">
+                <i class="fa-solid fa-bolt mr-1.5"></i> Quick Access
+            </button>
+            <button onclick="setAuthTab('register')" id="tab-btn-register" class="px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-inactive transition">
+                <i class="fa-solid fa-user-plus mr-1.5"></i> Register
+            </button>
+            <button onclick="setAuthTab('signin')" id="tab-btn-signin" class="px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-inactive transition">
+                <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Sign In
+            </button>
+        </div>
+
+        <!-- VIEW 1: Quick Demo Access -->
+        <div id="view-quick" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Company Column -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-building text-navy-700" style="color:#1a3a5c"></i>
+                        <span>Client / Company Portals</span>
+                        <div class="flex-1 h-px bg-gray-200"></div>
+                    </div>
+
+                    <!-- NovaTech -->
+                    <div onclick="loginAs('company_novatech')" class="gov-card-interactive p-5 rounded cursor-pointer group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded bg-blue-50 border border-blue-200 flex items-center justify-center font-bold text-sm text-blue-800">NT</div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-800 group-hover:underline serif">NovaTech Systems</h3>
+                                    <p class="text-xs text-gray-500">Fintech &amp; Web3 Infrastructure</p>
+                                </div>
+                            </div>
+                            <span class="badge-role">Company</span>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                            <span class="font-mono">Balance: 25,000 FWK</span>
+                            <span class="text-blue-700 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">
+                                Enter Portal <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Aurora AI -->
+                    <div onclick="loginAs('company_aurora')" class="gov-card-interactive p-5 rounded cursor-pointer group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded bg-blue-50 border border-blue-200 flex items-center justify-center font-bold text-sm text-blue-800">AU</div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-800 group-hover:underline serif">Aurora Systems</h3>
+                                    <p class="text-xs text-gray-500">Machine Learning &amp; IoT</p>
+                                </div>
+                            </div>
+                            <span class="badge-role">Company</span>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                            <span class="font-mono">Balance: 15,000 FWK</span>
+                            <span class="text-blue-700 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">
+                                Enter Portal <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Freelancers Column -->
+                <div class="space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-user-tie" style="color:#1a3a5c"></i>
+                        <span>Contractor / Freelancer Portals</span>
+                        <div class="flex-1 h-px bg-gray-200"></div>
+                    </div>
+
+                    <!-- Alex Rivera -->
+                    <div onclick="loginAs('freelancer_alex')" class="gov-card-interactive p-5 rounded cursor-pointer group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded bg-green-50 border border-green-200 flex items-center justify-center font-bold text-sm text-green-800">AR</div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-800 group-hover:underline serif">Alex Rivera</h3>
+                                    <p class="text-xs text-gray-500">Lead Smart Contract Engineer</p>
+                                </div>
+                            </div>
+                            <span class="badge-role">Freelancer</span>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                            <span class="font-mono">Rating: 4.98 · Rep: 960/1000</span>
+                            <span class="text-blue-700 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">
+                                Enter Portal <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Priya Sharma -->
+                    <div onclick="loginAs('freelancer_priya')" class="gov-card-interactive p-5 rounded cursor-pointer group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded bg-green-50 border border-green-200 flex items-center justify-center font-bold text-sm text-green-800">PS</div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-800 group-hover:underline serif">Priya Sharma</h3>
+                                    <p class="text-xs text-gray-500">Backup &amp; Contingency Specialist</p>
+                                </div>
+                            </div>
+                            <span class="badge-role">Freelancer</span>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                            <span class="font-mono">Rating: 4.92 · Rep: 925/1000</span>
+                            <span class="text-blue-700 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">
+                                Enter Portal <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Notice -->
+            <div class="gov-card p-4 rounded flex items-start gap-3 border-t-0 border-l-4" style="border-left-color:#2d6a4f;">
+                <i class="fa-solid fa-circle-info text-green-700 mt-0.5"></i>
+                <div class="text-xs text-gray-600">
+                    <span class="font-bold text-gray-800">Multi-Session Testing:</span> Open an Incognito window or separate browser to log in as both a Company and Freelancer simultaneously to observe live deliverable tracking and task relinquishment in real time.
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: Register New Account -->
+        <div id="view-register" class="hidden gov-card p-8 rounded space-y-6">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-xl font-bold text-gray-800 serif">Register New Profile</h2>
+                <p class="text-xs text-gray-500 mt-1">Create a company or freelancer account to access the platform.</p>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)" class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer border border-gray-200 p-4 rounded flex items-center space-x-3 has-[:checked]:border-blue-800 has-[:checked]:bg-blue-50">
+                        <input type="radio" name="reg-role" value="company" checked class="accent-blue-800">
+                        <div>
+                            <div class="text-sm font-bold text-gray-800">Company / Client</div>
+                            <div class="text-xs text-gray-500">Post contracts, fund escrow, allot talent</div>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer border border-gray-200 p-4 rounded flex items-center space-x-3 has-[:checked]:border-blue-800 has-[:checked]:bg-blue-50">
+                        <input type="radio" name="reg-role" value="freelancer" class="accent-blue-800">
+                        <div>
+                            <div class="text-sm font-bold text-gray-800">Freelancer / Contractor</div>
+                            <div class="text-xs text-gray-500">Browse contracts, submit work, receive payment</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Full Name or Organisation Name</label>
+                    <input type="text" id="reg-name" required class="gov-input w-full rounded px-4 py-2.5 text-sm" placeholder="e.g. Apex Digital Labs or Marcus Vance">
+                </div>
+
+                <div id="company-fields">
+                    <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Industry / Sector</label>
+                    <input type="text" id="reg-industry" class="gov-input w-full rounded px-4 py-2.5 text-sm" placeholder="e.g. DeFi, Cloud Infrastructure, AI Systems" value="Blockchain Architecture">
+                </div>
+
+                <div id="freelancer-fields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Professional Title / Designation</label>
+                        <input type="text" id="reg-title" class="gov-input w-full rounded px-4 py-2.5 text-sm" placeholder="e.g. Senior Smart Contract Engineer">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Skills (comma-separated)</label>
+                        <input type="text" id="reg-skills" class="gov-input w-full rounded px-4 py-2.5 text-sm" placeholder="Solidity, Python, Smart Contracts, Rust">
+                    </div>
+                </div>
+
+                <button type="submit" class="gov-btn-primary w-full py-3 rounded font-bold text-sm uppercase tracking-wider">
+                    <i class="fa-solid fa-user-check mr-2"></i> Create Profile &amp; Sign In
+                </button>
+            </form>
+        </div>
+
+        <!-- VIEW 3: Sign In Existing Account -->
+        <div id="view-signin" class="hidden gov-card p-8 rounded space-y-5">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-xl font-bold text-gray-800 serif">Sign In</h2>
+                <p class="text-xs text-gray-500 mt-1">Enter your registered User ID or name to access your workspace.</p>
+            </div>
+            <form id="signin-form" onsubmit="handleSignin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1" for="signin-id">User ID or Name</label>
+                    <input type="text" id="signin-id" required class="gov-input w-full rounded px-4 py-2.5 text-sm" placeholder="e.g. company_novatech or Alex Rivera">
+                </div>
+                <button type="submit" class="gov-btn-primary w-full py-3 rounded font-bold text-sm uppercase tracking-wider">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Sign In to Portal
+                </button>
+            </form>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-300 bg-white py-5 text-center text-xs text-gray-400">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>Fairwork Platform · Milestone-Based Escrow &amp; Verifiable Agreements</span>
+            <span class="font-mono text-gray-300">Cryptographic SHA-256 · Blockchain Ledger</span>
+        </div>
+    </footer>
+
+    <script>
+        function setAuthTab(tab) {
+            document.getElementById('view-quick').classList.toggle('hidden', tab !== 'quick');
+            document.getElementById('view-register').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('view-signin').classList.toggle('hidden', tab !== 'signin');
+
+            document.getElementById('tab-btn-quick').className = tab === 'quick'
+                ? 'px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-active transition'
+                : 'px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-inactive transition';
+            document.getElementById('tab-btn-register').className = tab === 'register'
+                ? 'px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-active transition'
+                : 'px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-inactive transition';
+            document.getElementById('tab-btn-signin').className = tab === 'signin'
+                ? 'px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-active transition'
+                : 'px-5 py-2.5 text-xs font-semibold tracking-wide uppercase gov-tab-inactive transition';
+        }
+
+        document.querySelectorAll('input[name="reg-role"]').forEach(r => {
+            r.addEventListener('change', () => {
+                const isCompany = r.value === 'company';
+                document.getElementById('company-fields').classList.toggle('hidden', !isCompany);
+                document.getElementById('freelancer-fields').classList.toggle('hidden', isCompany);
+            });
+        });
+
+        async function loginAs(userId) {
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert("Login failed: " + err);
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const role = document.querySelector('input[name="reg-role"]:checked').value;
+            const name = document.getElementById('reg-name').value;
+            const industry = document.getElementById('reg-industry').value;
+            const title = document.getElementById('reg-title').value;
+            const skills = document.getElementById('reg-skills').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        role, name, industry, title, skills
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert("Registration failed: " + err);
+            }
+        }
+
+        async function handleSignin(e) {
+            e.preventDefault();
+            const userId = document.getElementById('signin-id').value;
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert("Sign-in failed: " + err);
+            }
+        }
+    </script>
+</body>
+</html>

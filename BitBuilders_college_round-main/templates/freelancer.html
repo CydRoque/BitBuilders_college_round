@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fairwork — Freelancer Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; color: #1a1a2e; }
+        h1, h2, h3, h4, .serif { font-family: 'Source Serif 4', serif; }
+        .gov-header { background: #1a3a5c; border-bottom: 4px solid #c8102e; }
+        .gov-timebar { background: #e8edf2; border-bottom: 2px solid #d1d9e0; }
+        .gov-card { background: #ffffff; border: 1px solid #d1d9e0; border-radius: 4px; }
+        .gov-card-accent { background: #ffffff; border: 1px solid #d1d9e0; border-top: 3px solid #2d6a4f; border-radius: 4px; }
+        .gov-card-warning { background: #fffbf0; border: 1px solid #f6c54d; border-left: 4px solid #e0a800; border-radius: 4px; }
+        .gov-card-success { background: #f0faf4; border: 1px solid #b7dfc5; border-left: 4px solid #2d6a4f; border-radius: 4px; }
+        .gov-card-info { background: #f0f5fb; border: 1px solid #b0c8e0; border-left: 4px solid #1a3a5c; border-radius: 4px; }
+        .milestone-card { background: #ffffff; border: 1px solid #d1d9e0; border-left: 4px solid #b0bec5; border-radius: 4px; transition: border-color 0.2s; }
+        .milestone-card.active { border-left-color: #2d6a4f; background: #f9fdf9; }
+        .tab-gov-active { background: #1a3a5c; color: #ffffff; border-bottom: 3px solid #c8102e; }
+        .tab-gov-inactive { color: #4a6a8c; border-bottom: 3px solid transparent; }
+        .tab-gov-inactive:hover { background: #d0dae5; color: #1a3a5c; }
+        .tracker-step-active { border-color: #2d6a4f; background-color: #2d6a4f; color: #ffffff; box-shadow: 0 0 0 3px rgba(45,106,79,0.2); }
+        .tracker-step-done { border-color: #1a3a5c; background-color: #1a3a5c; color: #ffffff; }
+        .tracker-step-pending { border-color: #b0bec5; background-color: #f0f2f5; color: #90a4ae; }
+        .btn-primary { background: #1a3a5c; color: white; border: 1px solid #1a3a5c; border-radius: 3px; font-weight: 600; transition: background 0.2s; }
+        .btn-primary:hover { background: #2a4a6c; }
+        .btn-success { background: #2d6a4f; color: white; border: 1px solid #2d6a4f; border-radius: 3px; font-weight: 600; transition: background 0.2s; }
+        .btn-success:hover { background: #3a8a63; }
+        .btn-ghost { background: white; color: #4a6a8c; border: 1px solid #b0bec5; border-radius: 3px; font-weight: 600; }
+        .btn-ghost:hover { border-color: #1a3a5c; color: #1a3a5c; }
+        .gov-input { background: #f8f9fb; border: 1px solid #b0bec5; color: #1a1a2e; border-radius: 3px; }
+        .gov-input:focus { outline: none; border-color: #2d6a4f; background: #fff; box-shadow: 0 0 0 2px rgba(45,106,79,0.12); }
+        .badge { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 2px; text-transform: uppercase; }
+        .badge-navy { background: #e8edf2; color: #1a3a5c; border: 1px solid #b0bec5; }
+        .badge-green { background: #e8f5ee; color: #2d6a4f; border: 1px solid #b7dfc5; }
+        .badge-red { background: #fdf0f0; color: #c8102e; border: 1px solid #f5c2c2; }
+        .badge-amber { background: #fffbf0; color: #92600a; border: 1px solid #f6c54d; }
+        .chat-msg-me { background: #2d6a4f; color: white; border-radius: 12px 12px 3px 12px; }
+        .chat-msg-other { background: #f0f2f5; color: #1a1a2e; border: 1px solid #d1d9e0; border-radius: 12px 12px 12px 3px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f0f2f5; }
+        ::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 3px; }
+        .seal-icon { width:38px;height:38px;background:#fff;border:2px solid #c8102e;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1a3a5c;font-weight:900;font-size:12px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Government Header -->
+    <header class="gov-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="seal-icon">FW</div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-white font-bold text-base tracking-wide" style="font-family:'Source Serif 4',serif;">FAIRWORK</span>
+                        <span class="badge" style="background:#2d6a4f;color:white;border-color:#1d4a33;">FREELANCER PORTAL</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded bg-blue-900/40 border border-blue-700 text-xs font-mono">
+                    <i class="fa-solid fa-wallet text-blue-300 text-[10px]"></i>
+                    <span class="text-blue-300">Balance:</span>
+                    <span id="user-wallet-balance" class="font-bold text-white">Loading...</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded bg-green-900/40 border border-green-700 text-xs font-mono">
+                    <i class="fa-solid fa-star text-green-300 text-[10px]"></i>
+                    <span class="text-green-300">Reputation:</span>
+                    <span class="font-bold text-white">{{ user.reputation_score }}/1000</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-semibold text-white hidden md:inline">{{ user.name }}</span>
+                    <a href="/logout" class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-800 hover:bg-red-700 text-xs font-semibold text-white transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Time Bar -->
+        <div class="gov-timebar px-4 py-2">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 text-xs">
+                    <i class="fa-regular fa-clock text-gray-600"></i>
+                    <span class="text-gray-600 font-medium">Simulation Clock:</span>
+                    <span id="virtual-clock-display" class="font-mono text-gray-800 bg-white px-2 py-0.5 rounded border border-gray-300 font-semibold">--</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <button onclick="advanceTime(6)" class="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-mono text-[11px] border border-gray-300 transition">+6h</button>
+                    <button onclick="advanceTime(12)" class="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-mono text-[11px] border border-gray-300 transition">+12h</button>
+                    <button onclick="advanceTime(24)" class="px-2 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-800 font-mono text-[11px] border border-amber-300 transition font-semibold" title="Pass deadline">+24h (Deadline)</button>
+                    <button onclick="advanceTime(48)" class="px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-800 font-mono text-[11px] border border-red-300 transition font-bold" title="Breach buffer">+48h (Buffer Breach)</button>
+                    <button onclick="resetTime()" class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 font-mono text-[11px] border border-gray-300 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b-2 border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-1 overflow-x-auto">
+                <button onclick="switchTab('myjobs')" id="tab-myjobs" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-active transition">
+                    <i class="fa-solid fa-briefcase"></i> My Assignments
+                </button>
+                <button onclick="switchTab('market')" id="tab-market" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-magnifying-glass"></i> Job Marketplace
+                </button>
+                <button onclick="switchTab('blockchain')" id="tab-blockchain" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-cubes"></i> Blockchain Ledger
+                </button>
+                <button onclick="switchTab('chat')" id="tab-chat" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-comments"></i> Secure Messaging
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+
+        <!-- TAB 1: MY ASSIGNED JOBS & TRACKER -->
+        <section id="view-myjobs" class="space-y-5">
+            <!-- Multi-Job Assignments Overview & Selector -->
+            <div class="gov-card p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-6 bg-green-700 rounded"></div>
+                        <h2 class="text-sm font-bold uppercase text-gray-800 tracking-wider serif">My Freelance Contracts &amp; Assignments</h2>
+                        <span id="my-jobs-count-badge" class="badge badge-green font-mono">0 Active</span>
+                    </div>
+                    <button onclick="switchTab('market')" class="btn-ghost px-3 py-1.5 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Take On More Jobs
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500">Select any of your assigned or applied contracts below to inspect its delivery pipeline and submit milestone proofs.</p>
+                <div id="my-assigned-contracts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="text-xs text-gray-400 font-mono p-3">Loading your contracts...</div>
+                </div>
+            </div>
+
+            <!-- Active Contract Card -->
+            <div id="active-contract-detail-wrapper" class="space-y-5">
+            <div class="gov-card-accent p-6">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="badge badge-navy font-mono" id="contract-id-badge">FWK-CONTRACT-101</span>
+                            <span class="badge badge-green" id="contract-status-badge">ALLOTTED TO ME</span>
+                        </div>
+                        <h1 id="contract-title-display" class="text-xl font-bold text-gray-800 uppercase tracking-tight serif">Loading contract...</h1>
+                        <p id="contract-desc-display" class="text-xs text-gray-500 mt-1 max-w-3xl">--</p>
+                    </div>
+
+                    <!-- Payout summary -->
+                    <div class="flex items-center gap-0 bg-gray-50 rounded border border-gray-200 overflow-hidden shrink-0">
+                        <div class="text-center px-4 py-3 border-r border-gray-200">
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Contract Budget</div>
+                            <div id="contract-budget-display" class="text-base font-bold font-mono text-gray-800">0 FWK</div>
+                        </div>
+                        <div class="text-center px-4 py-3 border-r border-gray-200">
+                            <div class="text-[10px] text-blue-500 uppercase tracking-wider font-semibold">In Escrow Vault</div>
+                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-blue-700">0 FWK</div>
+                        </div>
+                        <div class="text-center px-4 py-3">
+                            <div class="text-[10px] text-green-600 uppercase tracking-wider font-semibold">Paid to Me</div>
+                            <div id="contract-released-display" class="text-base font-bold font-mono text-green-700">0 FWK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                    <div class="flex items-center space-x-5 text-gray-600">
+                        <div>
+                            <span class="text-gray-400">Client / Company: </span>
+                            <span id="tracker-company-name" class="font-bold text-gray-800">NovaTech Systems</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Contract Vault: </span>
+                            <span id="tracker-sc-address" class="text-blue-600">0xSC_...</span>
+                        </div>
+                    </div>
+                    <div class="text-green-700 font-semibold text-xs">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Punctuality Guarantee: 100% Payout on On-Time Delivery
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div class="gov-card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2 serif">
+                        <i class="fa-solid fa-route text-green-700"></i> Delivery Pipeline Progress
+                    </h2>
+                    <span id="pipeline-current-state-text" class="text-xs font-mono text-gray-500 font-semibold">Stage 3 / 6</span>
+                </div>
+
+                <div class="relative py-4 px-2">
+                    <div class="absolute top-1/2 left-8 right-8 -translate-y-1/2 h-1 bg-gray-200 rounded-full z-0">
+                        <div id="tracker-progress-fill" class="h-full bg-green-700 rounded-full transition-all duration-700" style="width: 50%;"></div>
+                    </div>
+                    <div class="relative z-10 grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+                        <div id="step-node-1" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-done"><i class="fa-solid fa-lock"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-500 mt-2 uppercase">1. Escrow Locked</span>
+                        </div>
+                        <div id="step-node-2" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-done"><i class="fa-solid fa-user-check"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-500 mt-2 uppercase">2. Allotted</span>
+                        </div>
+                        <div id="step-node-3" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-active"><i class="fa-solid fa-code"></i></div>
+                            <span class="text-[10px] font-semibold text-green-700 mt-2 uppercase">3. In Execution</span>
+                        </div>
+                        <div id="step-node-4" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending"><i class="fa-solid fa-fingerprint"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-400 mt-2 uppercase">4. Submitted</span>
+                        </div>
+                        <div id="step-node-5" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending"><i class="fa-solid fa-coins"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-400 mt-2 uppercase">5. Released</span>
+                        </div>
+                        <div id="step-node-6" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending"><i class="fa-solid fa-check-double"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-400 mt-2 uppercase">6. Completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 p-3 rounded bg-gray-50 border border-gray-200 text-xs font-mono text-gray-500 flex items-center justify-between">
+                    <span id="tracker-status-description">Milestone active. Submit deliverable to claim escrow release.</span>
+                    <span id="tracker-stage-timestamp" class="text-gray-400">Cryptographic Delivery Tracking</span>
+                </div>
+            </div>
+
+            <!-- Milestones -->
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-6 bg-green-700 rounded"></div>
+                    <h3 class="text-sm font-bold uppercase text-gray-700 tracking-wider serif">Milestone Execution &amp; Submission</h3>
+                </div>
+                <div id="milestones-container" class="space-y-3">
+                    <div class="text-center py-6 text-gray-400 text-xs font-mono gov-card p-4">Loading milestones...</div>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: JOB MARKETPLACE -->
+        <section id="view-market" class="hidden space-y-5">
+            <div class="pb-4 border-b-2 border-gray-200">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-7 bg-blue-800 rounded"></div>
+                    <h2 class="text-lg font-bold uppercase text-gray-800 tracking-wider serif">Explore Open Contracts</h2>
+                </div>
+                <p class="text-xs text-gray-500 ml-3 mt-1">Browse client projects with automated milestone escrow and qualification matching.</p>
+            </div>
+            <div id="market-contracts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <!-- TAB 3: BLOCKCHAIN EXPLORER -->
+        <section id="view-blockchain" class="hidden space-y-5">
+            <div class="pb-4 border-b-2 border-gray-200">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-7 bg-blue-800 rounded"></div>
+                    <h2 class="text-lg font-bold uppercase text-gray-800 tracking-wider serif">Blockchain Ledger &amp; Cryptographic Proofs</h2>
+                </div>
+                <p class="text-xs text-gray-500 ml-3 mt-1">Every deliverable submission generates a verifiable SHA-256 hash sealed in PoW blocks.</p>
+            </div>
+            <div id="blocks-stream-container" class="space-y-4"></div>
+        </section>
+
+        <!-- TAB 4: CHAT -->
+        <section id="view-chat" class="hidden space-y-4">
+            <div class="gov-card overflow-hidden border border-gray-200 flex flex-col md:flex-row h-[680px]">
+                <!-- Left Sidebar -->
+                <div class="w-full md:w-80 border-r border-gray-200 flex flex-col bg-gray-50">
+                    <div class="p-3 border-b border-gray-200 flex items-center justify-between bg-white">
+                        <span class="text-xs font-bold uppercase text-gray-700 tracking-wider flex items-center gap-2 serif">
+                            <i class="fa-solid fa-comments text-green-700"></i> Secure Messaging
+                        </span>
+                        <button onclick="openCreateRoomModal()" class="btn-success px-2.5 py-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[9px]"></i> New Room
+                        </button>
+                    </div>
+
+                    <!-- Public / Private Channel Tabs -->
+                    <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-100 p-1 gap-1">
+                        <button onclick="setChatChannelTab('public')" id="chat-tab-public" class="py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition bg-white text-green-800 shadow-sm border border-gray-200">
+                            <i class="fa-solid fa-globe text-[11px]"></i> Public
+                            <span id="chat-public-count" class="badge badge-green ml-0.5">0</span>
+                        </button>
+                        <button onclick="setChatChannelTab('private')" id="chat-tab-private" class="py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-gray-600 hover:text-gray-800">
+                            <i class="fa-solid fa-lock text-[11px]"></i> Private
+                            <span id="chat-private-count" class="badge badge-navy ml-0.5">0</span>
+                        </button>
+                    </div>
+
+                    <div class="p-2 border-b border-gray-200 bg-white">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                            <input type="text" id="chat-search" oninput="renderConversationList()" placeholder="Search rooms..." class="gov-input w-full pl-8 pr-3 py-1.5 text-xs">
+                        </div>
+                    </div>
+                    <div id="chat-conversations-list" class="flex-1 overflow-y-auto divide-y divide-gray-100">
+                        <div class="p-4 text-center text-xs text-gray-400 font-mono">Loading channels...</div>
+                    </div>
+                </div>
+
+                <!-- Right Chat Pane -->
+                <div class="flex-1 flex flex-col relative">
+                    <div class="p-3 px-4 border-b border-gray-200 bg-white flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-green-100 border border-green-200 flex items-center justify-center font-bold text-xs text-green-800">
+                                <span id="chat-header-avatar">GL</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span id="chat-header-name" class="text-xs font-bold text-gray-800">Select a Channel</span>
+                                    <span id="chat-header-type-badge" class="badge badge-green">PUBLIC</span>
+                                    <span id="chat-typing" class="hidden text-[10px] font-mono text-gray-400 italic"></span>
+                                </div>
+                                <div class="text-[10px] font-mono text-gray-400" id="chat-header-subtitle">
+                                    Ref: <span id="chat-header-contract">PUBLIC</span> · Verified Messaging Channel
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-400 text-sm">
+                            <button onclick="openCreateRoomModal(currentChatChannelTab)" class="btn-ghost px-2.5 py-1 text-[11px] flex items-center gap-1" title="Create Room">
+                                <i class="fa-solid fa-plus text-[9px]"></i> Create Room
+                            </button>
+                            <button onclick="switchTab('myjobs')" class="hover:text-green-700 p-1.5" title="My Assigned Jobs"><i class="fa-solid fa-briefcase text-xs"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                        <div class="flex justify-center my-2">
+                            <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+                                <i class="fa-solid fa-shield-halved text-[9px]"></i> Fairwork Messaging Channel
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="chat-image-preview-bar" class="hidden p-2.5 bg-green-50 border-t border-green-200 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <img id="chat-staged-img-preview" class="w-12 h-12 object-cover rounded border border-green-200">
+                            <div>
+                                <div class="text-xs text-gray-800 font-bold" id="chat-staged-img-name">Image attached</div>
+                                <div class="text-[10px] text-gray-500">Click send to upload and deliver</div>
+                            </div>
+                        </div>
+                        <button onclick="clearStagedImage()" class="text-gray-500 hover:text-red-600 text-xs px-2 py-1 bg-white border border-gray-200 rounded">
+                            <i class="fa-solid fa-xmark"></i> Remove
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-white border-t border-gray-200 flex items-center space-x-2">
+                        <input type="file" id="chat-file-input" accept="image/*" class="hidden" onchange="handleImageFileSelected(event)">
+                        <button onclick="document.getElementById('chat-file-input').click()" class="p-2 text-gray-400 hover:text-green-700 transition" title="Attach Image">
+                            <i class="fa-solid fa-paperclip text-sm"></i>
+                        </button>
+                        <button onclick="promptImageUrl()" class="p-2 text-gray-400 hover:text-green-700 transition" title="Paste Image URL">
+                            <i class="fa-regular fa-image text-sm"></i>
+                        </button>
+                        <input type="text" id="chat-text-input" oninput="onChatInputActivity()" placeholder="Type a message..." class="gov-input flex-1 px-4 py-2.5 text-xs" onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                        <button onclick="sendChatMessage()" class="btn-success px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            Send <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: CREATE CHAT ROOM (PUBLIC OR PRIVATE) -->
+    <div id="modal-create-chat-room" class="fixed inset-0 z-50 hidden bg-gray-800/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gov-card max-w-md w-full rounded p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                <h3 class="text-sm font-bold uppercase text-gray-800 tracking-wide serif">
+                    <i class="fa-solid fa-comments text-green-700 mr-2"></i>Create Messaging Room
+                </h3>
+                <button onclick="closeModal('modal-create-chat-room')" class="text-gray-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1.5">Channel Visibility</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="btn-room-type-public" onclick="selectNewRoomType('public')" class="p-2.5 rounded border-2 border-green-700 bg-green-50 text-green-900 text-xs font-bold flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-globe"></i> Public Channel
+                    </button>
+                    <button type="button" id="btn-room-type-private" onclick="selectNewRoomType('private')" class="p-2.5 rounded border border-gray-300 bg-white text-gray-600 text-xs font-bold flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-lock"></i> Private Room
+                    </button>
+                </div>
+                <input type="hidden" id="new-room-type" value="public">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Room Name / Title</label>
+                <input type="text" id="new-room-name" class="gov-input w-full px-3 py-2 text-xs" placeholder="e.g. Solidity Security Guild or Direct Project Sync">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Topic / Description</label>
+                <input type="text" id="new-room-desc" class="gov-input w-full px-3 py-2 text-xs" placeholder="Brief purpose of this channel...">
+            </div>
+
+            <div id="new-room-participants-section" class="hidden space-y-1.5">
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider">Invite Members (Private Room)</label>
+                <p class="text-[11px] text-gray-400">Select companies or freelancers who can access this private room:</p>
+                <div id="new-room-users-list" class="max-h-40 overflow-y-auto border border-gray-200 rounded p-2 bg-gray-50 space-y-1.5 text-xs">
+                    <div class="text-gray-400 text-center py-2">Loading users...</div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200">
+                <button onclick="closeModal('modal-create-chat-room')" class="btn-ghost px-4 py-2 text-xs">Cancel</button>
+                <button onclick="submitCreateChatRoom()" class="btn-success px-5 py-2 text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-plus mr-1"></i> Create Room
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN IMAGE VIEWER -->
+    <div id="modal-image-preview" class="fixed inset-0 z-50 hidden bg-gray-900/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="relative max-w-4xl w-full flex flex-col items-center">
+            <button onclick="closeModal('modal-image-preview')" class="absolute -top-10 right-0 text-white bg-gray-800 px-3 py-1 rounded text-xs hover:bg-gray-700">
+                <i class="fa-solid fa-xmark mr-1"></i> Close
+            </button>
+            <img id="modal-preview-img-element" class="max-h-[82vh] max-w-full rounded border border-gray-600 shadow-2xl object-contain bg-gray-950">
+            <span id="modal-preview-caption" class="text-xs text-gray-400 font-mono mt-3"></span>
+        </div>
+    </div>
+
+    <!-- MODAL: SUBMIT DELIVERABLE -->
+    <div id="modal-submit" class="fixed inset-0 z-50 hidden bg-gray-800/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gov-card-info max-w-md w-full rounded p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-blue-200 pb-3">
+                <h3 class="text-sm font-bold uppercase text-blue-900 tracking-wide serif">
+                    <i class="fa-solid fa-cloud-arrow-up text-blue-600 mr-2"></i>Submit Milestone Deliverable
+                </h3>
+                <button onclick="closeModal('modal-submit')" class="text-gray-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-500">
+                Your submission will be cryptographically hashed (SHA-256) and verified against the contract deadline.
+            </p>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Milestone</label>
+                <input type="text" id="modal-submit-milestone-title" disabled class="gov-input w-full px-3 py-2 text-xs bg-gray-100">
+                <input type="hidden" id="modal-submit-milestone-index">
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Deliverable Details / Commit Notes</label>
+                <textarea id="modal-submit-text" rows="3" class="gov-input w-full px-3 py-2 text-xs resize-none" placeholder="Explain what was built, test coverage, and documentation..."></textarea>
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Code Repository or Artifact Link</label>
+                <input type="text" id="modal-submit-link" class="gov-input w-full px-3 py-2 text-xs" placeholder="https://github.com/project/release/v1.0">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modal-submit')" class="btn-ghost px-4 py-2 text-xs">Cancel</button>
+                <button onclick="executeDeliverableSubmission()" class="btn-primary px-5 py-2 text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-fingerprint mr-1"></i> Generate Proof &amp; Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        const CHAT_USER_ID = {{ user.id|tojson }};
+        let activeContractId = 'FWK-CONTRACT-101';
+        let userSelectedContract = false;
+        let currentContract = null;
+        let allContractsCache = [];
+
+        let chatInterval = null;
+        let stagedImageData = null;
+        let lastRenderedMsgCount = -1;
+
+        function switchTab(tab) {
+            ['myjobs', 'market', 'blockchain', 'chat'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    btn.className = t === tab
+                        ? 'tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-active transition'
+                        : 'tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition';
+                }
+            });
+            if (tab === 'myjobs') refreshData();
+            if (tab === 'blockchain') loadBlockchainData();
+            if (tab === 'market') loadMarketContracts();
+            if (tab === 'chat') {
+                initChat();
+            } else {
+                if (activeRoomId && chatSocket) { emitTyping(false); }
+            }
+        }
+
+        function isMyAssignedContract(c) {
+            if (c.current_freelancer_id === CHAT_USER_ID) return true;
+            if ((c.milestones || []).some(m => m.assigned_freelancer_id === CHAT_USER_ID)) return true;
+            return false;
+        }
+
+        function isMyAppliedContract(c) {
+            return (c.applications || []).some(a => a.freelancer_id === CHAT_USER_ID);
+        }
+
+        function selectMyContract(contractId) {
+            activeContractId = contractId;
+            userSelectedContract = true;
+            switchTab('myjobs');
+            refreshData();
+        }
+
+        function renderMyAssignedContractsList(contracts) {
+            const grid = document.getElementById('my-assigned-contracts-grid');
+            const badge = document.getElementById('my-jobs-count-badge');
+            if (!grid) return;
+
+            const assignedList = contracts.filter(c => isMyAssignedContract(c));
+            const appliedOnlyList = contracts.filter(c => !isMyAssignedContract(c) && isMyAppliedContract(c));
+            const myAllJobs = [...assignedList, ...appliedOnlyList];
+
+            if (badge) {
+                badge.innerText = `${assignedList.length} Assigned · ${appliedOnlyList.length} Applied`;
+            }
+
+            grid.innerHTML = '';
+            const displayList = myAllJobs.length > 0 ? myAllJobs : contracts;
+
+            if (myAllJobs.length === 0) {
+                const notice = document.createElement('div');
+                notice.className = 'col-span-full p-3 rounded bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center justify-between';
+                notice.innerHTML = `
+                    <span><i class="fa-solid fa-circle-info mr-1.5 text-amber-600"></i>You have no assigned or applied contracts yet. Showing platform contracts below — visit the <strong>Job Marketplace</strong> to apply for multiple jobs.</span>
+                    <button onclick="switchTab('market')" class="btn-primary px-3 py-1 text-[11px] uppercase tracking-wider shrink-0 ml-3">Explore Jobs</button>
+                `;
+                grid.appendChild(notice);
+            }
+
+            displayList.forEach(c => {
+                const isSelected = (c.id === activeContractId);
+                const isAssigned = (c.current_freelancer_id === CHAT_USER_ID);
+                const isPastContributor = !isAssigned && (c.milestones || []).some(m => m.assigned_freelancer_id === CHAT_USER_ID);
+                const isApplied = isMyAppliedContract(c);
+
+                const totalMilestones = (c.milestones || []).length;
+                const approvedMilestones = (c.milestones || []).filter(m => m.status === 'APPROVED').length;
+
+                let roleBadge = '';
+                if (isAssigned) {
+                    roleBadge = c.status === 'COMPLETED'
+                        ? '<span class="badge badge-green"><i class="fa-solid fa-check-double mr-1"></i>COMPLETED</span>'
+                        : '<span class="badge badge-green"><i class="fa-solid fa-user-check mr-1"></i>ALLOTTED TO ME</span>';
+                } else if (isPastContributor) {
+                    roleBadge = '<span class="badge badge-amber">PAST CONTRIBUTOR</span>';
+                } else if (isApplied) {
+                    roleBadge = '<span class="badge badge-navy"><i class="fa-solid fa-clock mr-1"></i>APPLIED (PENDING)</span>';
+                } else {
+                    roleBadge = `<span class="badge badge-navy">${c.status}</span>`;
+                }
+
+                const card = document.createElement('div');
+                card.onclick = () => selectMyContract(c.id);
+                card.className = `cursor-pointer p-4 rounded border transition flex flex-col justify-between gap-3 ${
+                    isSelected
+                        ? 'bg-green-50/70 border-2 border-green-700 shadow-sm'
+                        : 'bg-white border-gray-200 hover:border-green-600 hover:bg-gray-50'
+                }`;
+
+                card.innerHTML = `
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="badge badge-navy font-mono">${c.id}</span>
+                            ${roleBadge}
+                        </div>
+                        <h4 class="font-bold text-sm text-gray-800 serif line-clamp-1">${c.title}</h4>
+                        <div class="text-[11px] text-gray-500 font-mono flex items-center justify-between">
+                            <span>Client: <strong class="text-gray-700">${c.company_name}</strong></span>
+                            <span>${approvedMilestones}/${totalMilestones} Milestones</span>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-200 flex items-center justify-between text-xs font-mono">
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase block">Budget</span>
+                            <span class="font-bold text-gray-800">${c.total_budget.toLocaleString()} FWK</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-green-600 uppercase block">Released</span>
+                            <span class="font-bold text-green-700">${c.escrow_released.toLocaleString()} FWK</span>
+                        </div>
+                        <span class="text-[11px] font-semibold ${isSelected ? 'text-green-800' : 'text-blue-700'}">
+                            ${isSelected ? '<i class="fa-solid fa-eye mr-1"></i>Viewing' : 'Select →'}
+                        </span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function refreshData() {
+            try {
+                const resMe = await fetch('/api/me');
+                if (!resMe.ok) { window.location.href = '/login'; return; }
+                const meData = await resMe.json();
+                document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} FWK`;
+
+                const resOverview = await fetch('/api/overview');
+                const overview = await resOverview.json();
+                document.getElementById('virtual-clock-display').innerText = overview.virtual_time_str;
+
+                const resAll = await fetch('/api/contracts');
+                if (resAll.ok) {
+                    const allData = await resAll.json();
+                    allContractsCache = allData.contracts || [];
+
+                    // Auto-select the freelancer's first assigned or applied contract if not manually chosen yet
+                    if (!userSelectedContract && allContractsCache.length > 0) {
+                        const myAssigned = allContractsCache.filter(c => isMyAssignedContract(c));
+                        const myApplied = allContractsCache.filter(c => isMyAppliedContract(c));
+                        if (myAssigned.length > 0 && !myAssigned.some(c => c.id === activeContractId)) {
+                            activeContractId = myAssigned[0].id;
+                        } else if (myAssigned.length === 0 && myApplied.length > 0 && !myApplied.some(c => c.id === activeContractId)) {
+                            activeContractId = myApplied[0].id;
+                        }
+                    }
+
+                    renderMyAssignedContractsList(allContractsCache);
+                }
+
+                const resC = await fetch(`/api/contract/${activeContractId}`);
+                if (resC.ok) {
+                    const dataC = await resC.json();
+                    currentContract = dataC.contract;
+                    renderContract(currentContract, overview.virtual_time);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderContract(c, virtualTime) {
+            document.getElementById('contract-id-badge').innerText = c.id;
+            const isAssignedToMe = (c.current_freelancer_id === CHAT_USER_ID);
+            const isAppliedByMe = isMyAppliedContract(c);
+            const statusBadge = document.getElementById('contract-status-badge');
+            if (isAssignedToMe) {
+                statusBadge.className = 'badge badge-green';
+                statusBadge.innerText = c.status === 'COMPLETED' ? 'COMPLETED BY ME' : 'ALLOTTED TO ME';
+            } else if (isAppliedByMe) {
+                statusBadge.className = 'badge badge-amber';
+                statusBadge.innerText = `APPLIED • ${c.status}`;
+            } else {
+                statusBadge.className = 'badge badge-navy';
+                statusBadge.innerText = `${c.status} (${c.freelancer_name || 'Unassigned'})`;
+            }
+            document.getElementById('contract-title-display').innerText = c.title;
+            document.getElementById('contract-desc-display').innerText = c.description;
+            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} FWK`;
+            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} FWK`;
+            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} FWK`;
+            document.getElementById('tracker-company-name').innerText = c.company_name;
+            document.getElementById('tracker-sc-address').innerText = c.smart_contract_address;
+
+            // Stepper
+            const stage = c.tracker_stage || 1;
+            document.getElementById('pipeline-current-state-text').innerText = `Stage ${stage} / 6`;
+            document.getElementById('tracker-status-description').innerText = c.tracker_stage_label;
+            const pct = Math.min(100, Math.round(((stage - 1) / 5) * 100));
+            document.getElementById('tracker-progress-fill').style.width = `${pct}%`;
+
+            for (let i = 1; i <= 6; i++) {
+                const node = document.getElementById(`step-node-${i}`);
+                if (!node) continue;
+                const circle = node.querySelector('div');
+                if (i < stage) circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-done';
+                else if (i === stage) circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-active';
+                else circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs tracker-step-pending';
+            }
+
+            // Render milestones
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
+            c.milestones.forEach((m, idx) => {
+                const isCurrent = (idx === c.current_milestone_index && c.status !== 'COMPLETED');
+                const card = document.createElement('div');
+                card.className = `milestone-card p-5 ${isCurrent ? 'active' : ''}`;
+
+                let isLate = false;
+                let isOverBuffer = false;
+                let delayHours = 0;
+                if (m.deadline_timestamp && m.status === 'IN_PROGRESS' && virtualTime > m.deadline_timestamp) {
+                    isLate = true;
+                    delayHours = Math.round((virtualTime - m.deadline_timestamp) / 3600);
+                    if (virtualTime > m.buffer_expiry_timestamp) isOverBuffer = true;
+                }
+
+                let badgeHtml = '';
+                if (m.status === 'APPROVED') badgeHtml = '<span class="badge badge-green"><i class="fa-solid fa-check mr-1"></i>Completed &amp; Paid</span>';
+                else if (m.status === 'RELINQUISHED') badgeHtml = '<span class="badge badge-amber">Reassigned</span>';
+                else if (isOverBuffer) badgeHtml = `<span class="badge badge-red animate-pulse"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Buffer Expired (+${delayHours}h Late)</span>`;
+                else if (isLate) badgeHtml = `<span class="badge badge-amber"><i class="fa-regular fa-clock mr-1"></i>Late (+${delayHours}h) — Penalty Applied</span>`;
+                else if (m.status === 'SUBMITTED') badgeHtml = '<span class="badge badge-navy"><i class="fa-solid fa-fingerprint mr-1"></i>Submitted &amp; Under Review</span>';
+                else badgeHtml = `<span class="badge badge-navy font-mono">Deadline: ${m.deadline_hours}h</span>`;
+
+                let actionHtml = '';
+                if ((m.status === 'IN_PROGRESS' || m.status === 'SUBMITTED') && c.current_freelancer_id === CHAT_USER_ID) {
+                    actionHtml = `<button onclick="openSubmitModal(${m.index}, '${m.title.replace(/'/g, "\\'")}')" class="btn-success px-4 py-2 text-xs uppercase tracking-wider">
+                        ${m.status === 'SUBMITTED' ? 'Update Submission' : '<i class="fa-solid fa-cloud-arrow-up mr-1"></i>Submit Deliverable'}
+                    </button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-sm text-gray-800 serif">${m.title}</span>
+                                ${badgeHtml}
+                            </div>
+                            <p class="text-xs text-gray-500">${m.description}</p>
+                            ${m.deliverable_hash ? `<div class="mt-2 text-[10px] font-mono text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200">Proof Hash: ${m.deliverable_hash}</div>` : ''}
+                        </div>
+                        <div class="flex items-center gap-4 shrink-0">
+                            <div class="text-right font-mono">
+                                <div class="text-xs font-bold text-gray-800">${m.amount.toLocaleString()} FWK</div>
+                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-red-600">-${m.penalty_amount} FWK Penalty</div>` : ''}
+                            </div>
+                            <div>${actionHtml}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function loadMarketContracts() {
+            try {
+                const res = await fetch('/api/contracts');
+                const data = await res.json();
+                allContractsCache = data.contracts || [];
+                const container = document.getElementById('market-contracts-grid');
+                container.innerHTML = '';
+                allContractsCache.forEach(c => {
+                    const isAssigned = (c.current_freelancer_id === CHAT_USER_ID);
+                    const isApplied = isMyAppliedContract(c);
+                    const skillsHtml = (c.required_skills || []).map(s => `<span class="badge badge-navy font-mono">${s}</span>`).join(' ');
+
+                    let actionBtns = '';
+                    if (isAssigned) {
+                        actionBtns = `
+                            <button onclick="selectMyContract('${c.id}')" class="btn-success w-full py-2 text-xs uppercase tracking-wider">
+                                <i class="fa-solid fa-briefcase mr-1"></i> Assigned to You — Open Tracker
+                            </button>
+                        `;
+                    } else if (isApplied) {
+                        actionBtns = `
+                            <div class="grid grid-cols-2 gap-2">
+                                <span class="badge badge-green flex items-center justify-center py-2 text-xs"><i class="fa-solid fa-check mr-1"></i> Applied</span>
+                                <button onclick="selectMyContract('${c.id}')" class="btn-ghost py-2 text-xs uppercase tracking-wider">
+                                    View Tracker
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        actionBtns = `
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="selectMyContract('${c.id}')" class="btn-ghost py-2 text-xs uppercase tracking-wider">
+                                    Inspect Contract
+                                </button>
+                                <button onclick="applyToContract('${c.id}')" class="btn-primary py-2 text-xs uppercase tracking-wider">
+                                    <i class="fa-solid fa-file-signature mr-1"></i> Apply Now
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'gov-card p-5 space-y-3 flex flex-col justify-between';
+                    card.innerHTML = `
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs font-mono">
+                                <span class="badge badge-navy">${c.id}</span>
+                                <span class="badge ${isAssigned ? 'badge-green' : 'badge-amber'}">${isAssigned ? 'ALLOTTED TO YOU' : c.status}</span>
+                            </div>
+                            <h4 class="font-bold text-sm text-gray-800 serif">${c.title}</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2">${c.description}</p>
+                            <div class="flex flex-wrap gap-1 pt-1">${skillsHtml}</div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100 text-xs font-mono">
+                                <span class="text-gray-500">Client: <strong class="text-gray-700">${c.company_name}</strong></span>
+                                <span class="text-green-700 font-bold">${c.total_budget.toLocaleString()} FWK (${(c.milestones || []).length} Milestones)</span>
+                            </div>
+                        </div>
+                        <div class="pt-2">${actionBtns}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function applyToContract(contractId) {
+            try {
+                const res = await fetch(`/api/contracts/${contractId}/apply`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ proposal_text: "Qualified blockchain engineer with verified milestone delivery record." })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Applied successfully! Match: ${data.application.qualification_score.match_percentage}%`);
+                    activeContractId = contractId;
+                    userSelectedContract = true;
+                    await loadMarketContracts();
+                    await refreshData();
+                } else showToast(data.error || 'Could not apply');
+            } catch (err) { showToast(String(err)); }
+        }
+
+        function openSubmitModal(milestoneIndex, title) {
+            document.getElementById('modal-submit-milestone-index').value = milestoneIndex;
+            document.getElementById('modal-submit-milestone-title').value = title;
+            document.getElementById('modal-submit').classList.remove('hidden');
+        }
+
+        async function executeDeliverableSubmission() {
+            const idx = parseInt(document.getElementById('modal-submit-milestone-index').value);
+            const text = document.getElementById('modal-submit-text').value;
+            const link = document.getElementById('modal-submit-link').value;
+            try {
+                const res = await fetch(`/api/contracts/${activeContractId}/submit_deliverable`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ milestone_index: idx, deliverable_text: text, deliverable_link: link })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal('modal-submit');
+                    showToast("Deliverable proof submitted and recorded on blockchain!");
+                    refreshData();
+                } else alert(data.error);
+            } catch (err) { alert(err); }
+        }
+
+        async function loadBlockchainData() {
+            try {
+                const res = await fetch('/api/blockchain');
+                const data = await res.json();
+                const container = document.getElementById('blocks-stream-container');
+                container.innerHTML = '';
+                [...data.chain].reverse().forEach(b => {
+                    const blockCard = document.createElement('div');
+                    blockCard.className = 'gov-card p-5 rounded space-y-2 font-mono text-xs';
+                    blockCard.innerHTML = `
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+                            <span class="font-bold text-gray-800 uppercase serif">Block #${b.index}</span>
+                            <span class="text-gray-400">Nonce: ${b.nonce}</span>
+                        </div>
+                        <div class="text-[11px] truncate text-gray-500">Hash: <span class="text-blue-700 font-semibold">${b.hash}</span></div>
+                        <div class="text-[11px] truncate text-gray-400">Prev: ${b.previous_hash}</div>
+                        <div class="text-[11px] truncate text-gray-400">Merkle Root: ${b.merkle_root}</div>
+                        <div class="text-[10px] text-gray-400 pt-1">Transactions (${b.tx_count}) recorded on-chain</div>
+                    `;
+                    container.appendChild(blockCard);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function advanceTime(h) {
+            await fetch('/api/time/advance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ hours: h })
+            });
+            showToast(`Time advanced +${h} hours`);
+            refreshData();
+        }
+
+        async function resetTime() {
+            await fetch('/api/time/reset', { method: 'POST' });
+            showToast("Clock reset to present");
+            refreshData();
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function showToast(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'p-3 rounded bg-green-800 text-white font-mono text-xs font-semibold border border-green-700 shadow-xl pointer-events-auto';
+            t.innerText = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        // ---------- Public & Private Real-Time Chat (Socket.IO + HTTP) ----------
+        let chatSocket = null;
+        let activeRoomId = null;
+        let currentChatChannelTab = 'public'; // 'public' or 'private'
+        let chatConversations = [];
+        let chatMessages = [];
+        let chatTypingTimer = null;
+        let chatIAmTyping = false;
+        let chatListTimer = null;
+        let chatUsersDirectory = [];
+
+        function chatTabVisible() {
+            const v = document.getElementById('view-chat');
+            return v && !v.classList.contains('hidden');
+        }
+
+        function setChatChannelTab(tab) {
+            currentChatChannelTab = (tab === 'private') ? 'private' : 'public';
+            const pubBtn = document.getElementById('chat-tab-public');
+            const privBtn = document.getElementById('chat-tab-private');
+            if (pubBtn && privBtn) {
+                if (currentChatChannelTab === 'public') {
+                    pubBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition bg-white text-green-800 shadow-sm border border-gray-200';
+                    privBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-gray-600 hover:text-gray-800';
+                } else {
+                    privBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition bg-white text-green-800 shadow-sm border border-gray-200';
+                    pubBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-gray-600 hover:text-gray-800';
+                }
+            }
+            renderConversationList();
+            const filtered = chatConversations.filter(c => (c.channel_type || 'private') === currentChatChannelTab);
+            const currentInTab = filtered.find(c => c.room_id === activeRoomId);
+            if (!currentInTab && filtered.length > 0) {
+                openRoom(filtered[0].room_id, true);
+            } else if (!filtered.length) {
+                activeRoomId = null;
+                updateChatHeader();
+                renderChatMessages([], CHAT_USER_ID);
+            }
+        }
+
+        function getChatSocket() {
+            if (chatSocket) return chatSocket;
+            try {
+                chatSocket = io({ transports: ['websocket', 'polling'] });
+                chatSocket.on('connect', () => {
+                    if (activeRoomId && chatTabVisible()) chatSocket.emit('join_chat', { room_id: activeRoomId });
+                });
+                chatSocket.on('connect_error', () => { console.warn('Chat socket connection failed; HTTP fallback active'); });
+                chatSocket.on('chat_history', (d) => {
+                    if (d.room_id !== activeRoomId) return;
+                    chatMessages = d.messages || [];
+                    renderChatMessages(chatMessages, d.current_user_id || CHAT_USER_ID);
+                });
+                chatSocket.on('new_message', (d) => {
+                    if (d.room_id === activeRoomId) {
+                        if (!chatMessages.some(m => m.id === d.message.id)) {
+                            chatMessages.push(d.message);
+                            renderChatMessages(chatMessages, CHAT_USER_ID);
+                        }
+                        if (d.message.sender_id !== CHAT_USER_ID) {
+                            if (chatTabVisible()) chatSocket.emit('mark_read', { room_id: activeRoomId });
+                            else showToast(`New message from ${d.message.sender_name}`);
+                        }
+                        hideTyping();
+                    }
+                    clearTimeout(chatListTimer);
+                    chatListTimer = setTimeout(loadConversations, 150);
+                });
+                chatSocket.on('messages_read', (d) => {
+                    if (d.room_id !== activeRoomId) return;
+                    const ids = new Set(d.message_ids || []);
+                    chatMessages.forEach(m => { if (ids.has(m.id) && !m.read_by.includes(d.reader_id)) m.read_by.push(d.reader_id); });
+                    renderChatMessages(chatMessages, CHAT_USER_ID);
+                });
+                chatSocket.on('typing', (d) => {
+                    if (d.room_id !== activeRoomId) return;
+                    const el = document.getElementById('chat-typing');
+                    if (!el) return;
+                    el.innerText = d.is_typing ? `${d.user_name || 'Someone'} is typing…` : '';
+                    el.classList.toggle('hidden', !d.is_typing);
+                    clearTimeout(chatTypingTimer);
+                    if (d.is_typing) chatTypingTimer = setTimeout(hideTyping, 4000);
+                });
+                chatSocket.on('conversation_update', () => {
+                    clearTimeout(chatListTimer);
+                    chatListTimer = setTimeout(loadConversations, 150);
+                });
+                chatSocket.on('chat_error', (d) => { showToast(d.error || 'Chat error'); });
+            } catch (e) {
+                console.warn('Socket.IO unavailable, using HTTP mode:', e);
+            }
+            return chatSocket;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('chat-typing');
+            if (el) { el.classList.add('hidden'); el.innerText = ''; }
+        }
+
+        async function initChat() {
+            getChatSocket();
+            await loadConversations();
+            const inTab = chatConversations.filter(c => (c.channel_type || 'private') === currentChatChannelTab);
+            if (!inTab.length && chatConversations.length) {
+                // Switch to whichever tab has rooms
+                const otherTab = currentChatChannelTab === 'public' ? 'private' : 'public';
+                setChatChannelTab(otherTab);
+                return;
+            }
+            if (!inTab.length) {
+                activeRoomId = null;
+                updateChatHeader();
+                renderChatMessages([], CHAT_USER_ID);
+                return;
+            }
+            const target = inTab.find(c => c.room_id === activeRoomId) || inTab[0];
+            openRoom(target.room_id, true);
+        }
+
+        async function openRoom(roomId, force) {
+            if (!force && roomId === activeRoomId) return;
+            const sock = getChatSocket();
+            if (activeRoomId && activeRoomId !== roomId && sock && sock.connected) {
+                sock.emit('leave_chat', { room_id: activeRoomId });
+            }
+            activeRoomId = roomId;
+            chatMessages = [];
+            hideTyping();
+
+            // Sync active tab if opening a room from another tab
+            const conv = chatConversations.find(x => x.room_id === roomId);
+            if (conv && conv.channel_type && conv.channel_type !== currentChatChannelTab) {
+                currentChatChannelTab = conv.channel_type;
+                const pubBtn = document.getElementById('chat-tab-public');
+                const privBtn = document.getElementById('chat-tab-private');
+                if (pubBtn && privBtn) {
+                    if (currentChatChannelTab === 'public') {
+                        pubBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition bg-white text-green-800 shadow-sm border border-gray-200';
+                        privBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-gray-600 hover:text-gray-800';
+                    } else {
+                        privBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition bg-white text-green-800 shadow-sm border border-gray-200';
+                        pubBtn.className = 'py-2 px-2 rounded text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition text-gray-600 hover:text-gray-800';
+                    }
+                }
+            }
+
+            document.getElementById('chat-messages-container').innerHTML =
+                '<div class="p-4 text-center text-xs text-gray-400 font-mono">Loading channel history...</div>';
+            updateChatHeader();
+            renderConversationList();
+
+            if (sock && sock.connected) {
+                sock.emit('join_chat', { room_id: roomId });
+            }
+
+            // Always fetch via HTTP immediately so the room never gets stuck loading
+            try {
+                const res = await fetch(`/api/chat/room/${encodeURIComponent(roomId)}`);
+                if (res.ok && activeRoomId === roomId) {
+                    const d = await res.json();
+                    chatMessages = d.messages || [];
+                    renderChatMessages(chatMessages, d.current_user_id || CHAT_USER_ID);
+                    loadConversations();
+                }
+            } catch (e) {
+                console.error('Error fetching room messages:', e);
+            }
+        }
+
+        function updateChatHeader() {
+            const c = chatConversations.find(x => x.room_id === activeRoomId);
+            const nameEl = document.getElementById('chat-header-name');
+            const avatarEl = document.getElementById('chat-header-avatar');
+            const contractEl = document.getElementById('chat-header-contract');
+            const badgeEl = document.getElementById('chat-header-type-badge');
+            if (!c) {
+                if (nameEl) nameEl.innerText = 'No Room Selected';
+                if (avatarEl) avatarEl.innerText = '--';
+                if (contractEl) contractEl.innerText = 'NONE';
+                return;
+            }
+            const name = c.counterpart_name || 'Channel';
+            const isPub = (c.channel_type === 'public');
+            if (nameEl) nameEl.innerText = name;
+            if (avatarEl) avatarEl.innerText = isPub ? '#' : name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            if (contractEl) contractEl.innerText = `${c.contract_id || (isPub ? 'PUBLIC' : 'PRIVATE')} · ${c.contract_title || ''}`;
+            if (badgeEl) {
+                badgeEl.innerText = isPub ? 'PUBLIC CHANNEL' : 'PRIVATE ROOM';
+                badgeEl.className = `badge ${isPub ? 'badge-green' : 'badge-navy'}`;
+            }
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/chat/conversations');
+                if (!res.ok) return;
+                const data = await res.json();
+                chatConversations = data.conversations || [];
+                const pubCount = chatConversations.filter(c => c.channel_type === 'public').length;
+                const privCount = chatConversations.filter(c => (c.channel_type || 'private') === 'private').length;
+                const pubBadge = document.getElementById('chat-public-count');
+                const privBadge = document.getElementById('chat-private-count');
+                if (pubBadge) pubBadge.innerText = pubCount;
+                if (privBadge) privBadge.innerText = privCount;
+                renderConversationList();
+                updateChatHeader();
+            } catch (err) { console.error('Error loading conversations:', err); }
+        }
+
+        function renderConversationList() {
+            const list = document.getElementById('chat-conversations-list');
+            if (!list) return;
+            const q = (document.getElementById('chat-search')?.value || '').toLowerCase();
+            list.innerHTML = '';
+            const rows = chatConversations.filter(c => {
+                const cType = c.channel_type || 'private';
+                if (cType !== currentChatChannelTab) return false;
+                return !q ||
+                    (c.counterpart_name || '').toLowerCase().includes(q) ||
+                    (c.contract_title || '').toLowerCase().includes(q) ||
+                    (c.contract_id || '').toLowerCase().includes(q);
+            });
+            if (!rows.length) {
+                const label = currentChatChannelTab === 'public' ? 'public channels' : 'private rooms';
+                list.innerHTML = `
+                    <div class="p-5 text-center space-y-2">
+                        <div class="text-xs text-gray-400 font-mono">No ${label} found.</div>
+                        <button onclick="openCreateRoomModal('${currentChatChannelTab}')" class="btn-success px-3 py-1.5 text-[11px] uppercase tracking-wider">
+                            <i class="fa-solid fa-plus mr-1"></i> Create ${currentChatChannelTab === 'public' ? 'Public Channel' : 'Private Room'}
+                        </button>
+                    </div>`;
+                return;
+            }
+            rows.forEach(c => {
+                const item = document.createElement('div');
+                const active = c.room_id === activeRoomId;
+                const isPub = c.channel_type === 'public';
+                item.className = `p-3.5 cursor-pointer hover:bg-white transition flex items-center justify-between ${active ? 'bg-white border-l-4 border-green-700' : ''}`;
+                item.onclick = () => openRoom(c.room_id);
+                const name = c.counterpart_name || 'Channel';
+                const initials = isPub ? '#' : name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const unread = (active && chatTabVisible()) ? 0 : (c.unread_count || 0);
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3 truncate">
+                        <div class="w-9 h-9 rounded-full ${isPub ? 'bg-green-100 border-green-300 text-green-800' : 'bg-blue-50 border-blue-200 text-blue-900'} border flex items-center justify-center font-bold text-xs flex-shrink-0">${escapeHtml(initials)}</div>
+                        <div class="truncate">
+                            <div class="flex items-center gap-1.5">
+                                <h4 class="text-xs font-bold text-gray-800 truncate">${escapeHtml(name)}</h4>
+                                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded ${isPub ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-600 border border-gray-200'} uppercase">${isPub ? 'Public' : 'Private'}</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500 truncate mt-0.5">${escapeHtml(c.last_message || c.contract_title || 'No messages yet')}</p>
+                            <span class="text-[9px] font-mono text-gray-400 uppercase">${escapeHtml(c.contract_id || '')}</span>
+                        </div>
+                    </div>
+                    ${unread > 0 ? `<span class="px-1.5 py-0.5 rounded-full bg-green-700 text-white text-[9px] font-bold font-mono">${unread}</span>` : ''}
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderChatMessages(messages, currentUserId) {
+            const container = document.getElementById('chat-messages-container');
+            if (!container) return;
+            const c = chatConversations.find(x => x.room_id === activeRoomId);
+            const isPub = c && c.channel_type === 'public';
+            container.innerHTML = `
+                <div class="flex justify-center my-2">
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                        <i class="fa-solid ${isPub ? 'fa-globe text-green-700' : 'fa-lock text-blue-800'} text-[9px] mr-1"></i>
+                        ${isPub ? 'Public Community Channel — Visible to All Verified Users' : 'Private Encrypted Channel — Direct & Escrow Protected'}
+                    </span>
+                </div>
+            `;
+            if (!activeRoomId) {
+                container.insertAdjacentHTML('beforeend', '<div class="p-4 text-center text-xs text-gray-400 font-mono">Select or create a room to start messaging.</div>');
+                return;
+            }
+            if (!messages || !messages.length) {
+                container.insertAdjacentHTML('beforeend', '<div class="p-4 text-center text-xs text-gray-400 font-mono">No messages in this room yet. Say hello below!</div>');
+                return;
+            }
+            messages.forEach(msg => {
+                const isMe = (msg.sender_id === currentUserId);
+                const seen = isMe && (msg.read_by || []).some(u => u !== currentUserId);
+                const bubble = document.createElement('div');
+                bubble.className = `flex flex-col max-w-[75%] sm:max-w-[65%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`;
+                const timeStr = new Date((msg.timestamp || Date.now() / 1000) * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                bubble.innerHTML = `
+                    <div class="p-3 px-3.5 text-xs ${isMe ? 'chat-msg-me' : 'chat-msg-other'} shadow-sm space-y-1">
+                        ${!isMe ? `<div class="text-[10px] font-bold text-green-700 font-mono">${escapeHtml(msg.sender_name)} <span class="text-[9px] text-gray-400 font-normal uppercase">(${escapeHtml(msg.sender_role || 'user')})</span></div>` : ''}
+                        ${msg.image_data ? `
+                        <div data-img class="mb-1.5 overflow-hidden rounded border ${isMe ? 'border-green-300' : 'border-gray-300'} relative group cursor-pointer">
+                            <img class="max-h-56 w-auto object-cover rounded transition group-hover:opacity-90">
+                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-mono font-bold">
+                                <i class="fa-solid fa-expand mr-1.5"></i> Enlarge
+                            </div>
+                        </div>` : ''}
+                        ${msg.text ? `<div class="leading-relaxed font-sans whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</div>` : ''}
+                        <div class="flex items-center justify-end space-x-1 text-[9px] font-mono ${isMe ? 'text-green-200' : 'text-gray-400'} pt-0.5">
+                            <span>${timeStr}</span>
+                            ${isMe ? `<i class="fa-solid fa-check-double text-[9px] ${seen ? 'text-green-200' : 'text-green-400'}" title="${seen ? 'Seen' : 'Delivered'}"></i>` : ''}
+                        </div>
+                    </div>
+                `;
+                if (msg.image_data) {
+                    const wrap = bubble.querySelector('[data-img]');
+                    wrap.querySelector('img').src = msg.image_data;
+                    wrap.addEventListener('click', () => openImageModal(msg.image_data, msg.sender_name));
+                }
+                container.appendChild(bubble);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+
+        async function sendChatMessage() {
+            const textInput = document.getElementById('chat-text-input');
+            const text = textInput.value.trim();
+            const imagePayload = stagedImageData;
+            if (!activeRoomId) {
+                showToast('Please select or create a chat room first.');
+                return;
+            }
+            if (!text && !imagePayload) return;
+
+            textInput.value = '';
+            clearStagedImage();
+            emitTyping(false);
+
+            try {
+                const res = await fetch(`/api/chat/room/${encodeURIComponent(activeRoomId)}/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, image_data: imagePayload })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    showToast(data.error || 'Could not send message');
+                    return;
+                }
+                if (data.message && !chatMessages.some(m => m.id === data.message.id)) {
+                    chatMessages.push(data.message);
+                    renderChatMessages(chatMessages, CHAT_USER_ID);
+                }
+                loadConversations();
+            } catch (err) {
+                console.error('Error sending message:', err);
+                showToast('Failed to send message');
+            }
+        }
+
+        // ---------- Create Public / Private Room Modal ----------
+        async function openCreateRoomModal(defaultType) {
+            const type = (defaultType === 'private' || defaultType === 'public') ? defaultType : currentChatChannelTab;
+            document.getElementById('new-room-name').value = '';
+            document.getElementById('new-room-desc').value = '';
+            selectNewRoomType(type);
+            document.getElementById('modal-create-chat-room').classList.remove('hidden');
+            await loadChatUsersForModal();
+        }
+
+        function selectNewRoomType(type) {
+            const roomType = (type === 'private') ? 'private' : 'public';
+            document.getElementById('new-room-type').value = roomType;
+            const pubBtn = document.getElementById('btn-room-type-public');
+            const privBtn = document.getElementById('btn-room-type-private');
+            const partSec = document.getElementById('new-room-participants-section');
+            if (roomType === 'public') {
+                pubBtn.className = 'p-2.5 rounded border-2 border-green-700 bg-green-50 text-green-900 text-xs font-bold flex items-center justify-center gap-1.5';
+                privBtn.className = 'p-2.5 rounded border border-gray-300 bg-white text-gray-600 text-xs font-bold flex items-center justify-center gap-1.5';
+                partSec.classList.add('hidden');
+            } else {
+                privBtn.className = 'p-2.5 rounded border-2 border-green-700 bg-green-50 text-green-900 text-xs font-bold flex items-center justify-center gap-1.5';
+                pubBtn.className = 'p-2.5 rounded border border-gray-300 bg-white text-gray-600 text-xs font-bold flex items-center justify-center gap-1.5';
+                partSec.classList.remove('hidden');
+            }
+        }
+
+        async function loadChatUsersForModal() {
+            const listEl = document.getElementById('new-room-users-list');
+            if (!listEl) return;
+            try {
+                const res = await fetch('/api/chat/users');
+                const data = await res.json();
+                chatUsersDirectory = data.users || [];
+                if (!chatUsersDirectory.length) {
+                    listEl.innerHTML = '<div class="text-gray-400 text-center py-2">No other users found.</div>';
+                    return;
+                }
+                listEl.innerHTML = '';
+                chatUsersDirectory.forEach(u => {
+                    const row = document.createElement('label');
+                    row.className = 'flex items-center justify-between p-1.5 rounded hover:bg-white cursor-pointer border border-transparent hover:border-gray-200';
+                    row.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" class="new-room-user-checkbox rounded text-green-700" value="${escapeHtml(u.id)}">
+                            <span class="font-semibold text-gray-800">${escapeHtml(u.name)}</span>
+                        </div>
+                        <span class="badge ${u.role === 'company' ? 'badge-navy' : 'badge-green'} uppercase">${escapeHtml(u.title || u.role)}</span>
+                    `;
+                    listEl.appendChild(row);
+                });
+            } catch (e) {
+                listEl.innerHTML = '<div class="text-red-500 text-center py-2">Failed to load users.</div>';
+            }
+        }
+
+        async function submitCreateChatRoom() {
+            const name = document.getElementById('new-room-name').value.trim();
+            const desc = document.getElementById('new-room-desc').value.trim();
+            const channelType = document.getElementById('new-room-type').value || 'public';
+            if (!name) {
+                showToast('Please enter a room name');
+                return;
+            }
+            const checked = Array.from(document.querySelectorAll('.new-room-user-checkbox:checked')).map(cb => cb.value);
+            if (channelType === 'private' && checked.length === 0) {
+                showToast('Please select at least one participant for a private room');
+                return;
+            }
+            try {
+                const res = await fetch('/api/chat/rooms/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        description: desc,
+                        channel_type: channelType,
+                        participants: checked
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    showToast(data.error || 'Could not create room');
+                    return;
+                }
+                closeModal('modal-create-chat-room');
+                showToast(`${channelType === 'public' ? 'Public channel' : 'Private room'} "${name}" created!`);
+                await loadConversations();
+                setChatChannelTab(channelType);
+                openRoom(data.room.room_id, true);
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to create room');
+            }
+        }
+
+        function emitTyping(isTyping) {
+            if (!activeRoomId || !chatSocket || !chatSocket.connected) return;
+            if (chatIAmTyping === isTyping && isTyping) return;
+            chatIAmTyping = isTyping;
+            chatSocket.emit('typing', { room_id: activeRoomId, is_typing: isTyping });
+        }
+
+        let chatStopTypingTimer = null;
+        function onChatInputActivity() {
+            emitTyping(true);
+            clearTimeout(chatStopTypingTimer);
+            chatStopTypingTimer = setTimeout(() => emitTyping(false), 1500);
+        }
+
+        function handleImageFileSelected(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                stagedImageData = evt.target.result;
+                document.getElementById('chat-staged-img-preview').src = stagedImageData;
+                document.getElementById('chat-staged-img-name').innerText = file.name;
+                document.getElementById('chat-image-preview-bar').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function promptImageUrl() {
+            const url = prompt("Enter or paste public image URL:");
+            if (url && url.trim()) {
+                stagedImageData = url.trim();
+                document.getElementById('chat-staged-img-preview').src = stagedImageData;
+                document.getElementById('chat-staged-img-name').innerText = "Image from Web URL";
+                document.getElementById('chat-image-preview-bar').classList.remove('hidden');
+            }
+        }
+
+        function clearStagedImage() {
+            stagedImageData = null;
+            document.getElementById('chat-file-input').value = '';
+            document.getElementById('chat-image-preview-bar').classList.add('hidden');
+        }
+
+        function openImageModal(imgSrc, sender) {
+            document.getElementById('modal-preview-img-element').src = imgSrc;
+            document.getElementById('modal-preview-caption').innerText = `Sent by ${sender} • Fairwork Escrow Room`;
+            document.getElementById('modal-image-preview').classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', refreshData);
+    </script>
+</body>
+</html>
