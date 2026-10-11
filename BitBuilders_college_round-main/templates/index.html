@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fairwork — Milestone Delivery &amp; Escrow Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; color: #1a1a2e; }
+        h1, h2, h3, h4, .serif { font-family: 'Source Serif 4', serif; }
+        /* ── Header & chrome ── */
+        .gov-header { background: #1a3a5c; border-bottom: 4px solid #c8102e; }
+        .gov-subbar { background: #2a4a6c; border-bottom: 1px solid #1a3a5c; }
+        .gov-timebar { background: #e8edf2; border-bottom: 2px solid #d1d9e0; }
+        /* ── Cards ── */
+        .gov-card { background: #ffffff; border: 1px solid #d1d9e0; border-radius: 4px; }
+        .gov-card-accent { background: #ffffff; border: 1px solid #d1d9e0; border-top: 3px solid #1a3a5c; border-radius: 4px; }
+        .gov-card-warning { background: #fffbf0; border: 1px solid #f6c54d; border-left: 4px solid #e0a800; border-radius: 4px; }
+        .gov-card-success { background: #f0faf4; border: 1px solid #b7dfc5; border-left: 4px solid #2d6a4f; border-radius: 4px; }
+        .milestone-card { background: #ffffff; border: 1px solid #d1d9e0; border-left: 4px solid #b0bec5; border-radius: 4px; transition: border-color 0.2s; }
+        .milestone-card.active { border-left-color: #1a3a5c; }
+        /* ── Tabs ── */
+        .tab-gov-active { background: #1a3a5c; color: #ffffff; border-bottom: 3px solid #c8102e; }
+        .tab-gov-inactive { color: #4a6a8c; border-bottom: 3px solid transparent; }
+        .tab-gov-inactive:hover { background: #d0dae5; color: #1a3a5c; }
+        /* ── Tracker Steps ── */
+        .tracker-step-active { border-color: #1a3a5c; background-color: #1a3a5c; color: #ffffff; box-shadow: 0 0 0 3px rgba(26,58,92,0.2); }
+        .tracker-step-done { border-color: #2d6a4f; background-color: #2d6a4f; color: #ffffff; }
+        .tracker-step-pending { border-color: #b0bec5; background-color: #f0f2f5; color: #90a4ae; }
+        /* ── Buttons ── */
+        .btn-primary { background: #1a3a5c; color: white; border: 1px solid #1a3a5c; border-radius: 3px; font-weight: 600; transition: background 0.2s; }
+        .btn-primary:hover { background: #2a4a6c; }
+        .btn-success { background: #2d6a4f; color: white; border: 1px solid #2d6a4f; border-radius: 3px; font-weight: 600; transition: background 0.2s; }
+        .btn-success:hover { background: #3a8a63; }
+        .btn-warning { background: #e0a800; color: white; border: 1px solid #e0a800; border-radius: 3px; font-weight: 600; }
+        .btn-warning:hover { background: #c49600; }
+        .btn-ghost { background: white; color: #4a6a8c; border: 1px solid #b0bec5; border-radius: 3px; font-weight: 600; }
+        .btn-ghost:hover { border-color: #1a3a5c; color: #1a3a5c; }
+        /* ── Form Inputs ── */
+        .gov-input { background: #f8f9fb; border: 1px solid #b0bec5; color: #1a1a2e; border-radius: 3px; }
+        .gov-input:focus { outline: none; border-color: #1a3a5c; background: #fff; box-shadow: 0 0 0 2px rgba(26,58,92,0.12); }
+        /* ── Badges ── */
+        .badge { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 2px; text-transform: uppercase; }
+        .badge-navy { background: #e8edf2; color: #1a3a5c; border: 1px solid #b0bec5; }
+        .badge-green { background: #e8f5ee; color: #2d6a4f; border: 1px solid #b7dfc5; }
+        .badge-red { background: #fdf0f0; color: #c8102e; border: 1px solid #f5c2c2; }
+        .badge-amber { background: #fffbf0; color: #92600a; border: 1px solid #f6c54d; }
+        .badge-teal { background: #f0f8fb; color: #1d6a8a; border: 1px solid #b0d4e0; }
+        /* ── Persona buttons ── */
+        .persona-btn { font-size: 11px; padding: 5px 12px; border-radius: 3px; font-weight: 600; transition: all 0.15s; cursor: pointer; }
+        .persona-btn-active { background: #1a3a5c; color: white; border: 1px solid #1a3a5c; }
+        .persona-btn-inactive { background: #f0f2f5; color: #4a6a8c; border: 1px solid #b0bec5; }
+        .persona-btn-inactive:hover { background: #d0dae5; }
+        /* ── Seal ── */
+        .seal-icon { width:38px;height:38px;background:#fff;border:2px solid #c8102e;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1a3a5c;font-weight:900;font-size:12px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f0f2f5; }
+        ::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Government Header -->
+    <header class="gov-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <!-- Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="seal-icon">FW</div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-white font-bold text-base tracking-wide" style="font-family:'Source Serif 4',serif;">FAIRWORK</span>
+                        <span class="badge badge-teal" style="background:#e8f5ee;color:#2d6a4f;border-color:#b7dfc5;">Demo Portal</span>
+                    </div>
+                    <p class="text-blue-200 text-[10px] -mt-0.5">Milestone-Based Escrow &amp; Delivery Tracking</p>
+                </div>
+            </div>
+
+            <!-- Role Switcher -->
+            <div class="hidden md:flex items-center space-x-1 bg-blue-900/40 p-1 rounded border border-blue-700">
+                <span class="text-[11px] text-blue-300 px-2 font-medium"><i class="fa-solid fa-user-tag mr-1"></i>Role:</span>
+                <button onclick="setPersona('company_novatech')" id="btn-persona-company" class="persona-btn persona-btn-active">
+                    <i class="fa-solid fa-building mr-1"></i> NovaTech (Company)
+                </button>
+                <button onclick="setPersona('freelancer_alex')" id="btn-persona-alex" class="persona-btn persona-btn-inactive">
+                    <i class="fa-solid fa-user-tie mr-1"></i> Alex (Freelancer 1)
+                </button>
+                <button onclick="setPersona('freelancer_priya')" id="btn-persona-priya" class="persona-btn persona-btn-inactive">
+                    <i class="fa-solid fa-user mr-1"></i> Priya (Freelancer 2)
+                </button>
+            </div>
+
+            <!-- Status Indicators -->
+            <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 px-3 py-1.5 rounded bg-blue-900/40 border border-blue-700 text-xs font-mono">
+                    <i class="fa-solid fa-wallet text-blue-300 text-[10px]"></i>
+                    <span class="text-blue-300">Wallet:</span>
+                    <span id="user-wallet-balance" class="font-bold text-white">--</span>
+                </div>
+                <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded bg-blue-900/40 border border-blue-700 text-xs font-mono">
+                    <i class="fa-solid fa-cubes text-blue-300 text-[10px]"></i>
+                    <span class="text-blue-300">Height:</span>
+                    <span id="block-height-badge" class="font-bold text-white">#0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Time Bar -->
+        <div class="gov-timebar px-4 py-2">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 text-xs">
+                    <i class="fa-regular fa-clock text-gray-600"></i>
+                    <span class="text-gray-600 font-medium">Simulation Clock:</span>
+                    <span id="virtual-clock-display" class="font-mono text-gray-800 bg-white px-2 py-0.5 rounded border border-gray-300 font-semibold">--</span>
+                    <span class="text-[11px] text-gray-400 hidden lg:inline">(Simulate time to trigger deadlines, penalties, and buffer relinquishment)</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <button onclick="advanceTime(6)" class="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-mono text-[11px] border border-gray-300 transition">+6h</button>
+                    <button onclick="advanceTime(12)" class="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-mono text-[11px] border border-gray-300 transition">+12h</button>
+                    <button onclick="advanceTime(24)" class="px-2 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-800 font-mono text-[11px] border border-amber-300 transition font-semibold" title="Trigger deadline">+24h (Pass Deadline)</button>
+                    <button onclick="advanceTime(48)" class="px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-800 font-mono text-[11px] border border-red-300 transition font-bold" title="Breach buffer">+48h (Exceed Buffer)</button>
+                    <button onclick="resetTime()" class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 font-mono text-[11px] border border-gray-300 transition"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b-2 border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-1 overflow-x-auto">
+                <button onclick="switchTab('tracker')" id="tab-tracker" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-active transition">
+                    <i class="fa-solid fa-truck-fast"></i> Delivery Tracker
+                </button>
+                <button onclick="switchTab('jobs')" id="tab-jobs" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-briefcase"></i> Job Marketplace
+                </button>
+                <button onclick="switchTab('freelancers')" id="tab-freelancers" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-user-check"></i> Freelancer Profiles &amp; Match
+                </button>
+                <button onclick="switchTab('blockchain')" id="tab-blockchain" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-cubes"></i> Blockchain Explorer
+                </button>
+                <button onclick="switchTab('postjob')" id="tab-postjob" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition">
+                    <i class="fa-solid fa-file-contract"></i> Post New Contract
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: DELIVERY TRACKER -->
+        <section id="view-tracker" class="space-y-5">
+
+            <!-- Multi-Contract Selector Bar -->
+            <div class="gov-card p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-6 bg-blue-800 rounded"></div>
+                        <h2 class="text-sm font-bold uppercase text-gray-800 tracking-wider serif">Active Contracts &amp; Assignments</h2>
+                        <span id="demo-contracts-count-badge" class="badge badge-navy font-mono">1 Contract</span>
+                    </div>
+                    <button onclick="switchTab('jobs')" class="btn-ghost px-3 py-1.5 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-briefcase text-[10px]"></i> Marketplace
+                    </button>
+                </div>
+                <div id="demo-contracts-switcher-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="text-xs text-gray-400 font-mono p-3">Loading contracts...</div>
+                </div>
+            </div>
+
+            <!-- Active Contract Banner -->
+            <div class="gov-card-accent p-6">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="badge badge-navy font-mono">CONTRACT # <span id="contract-id-badge">FWK-CONTRACT-101</span></span>
+                            <span id="contract-status-badge" class="badge badge-green">ACTIVE ESCROW</span>
+                        </div>
+                        <h1 id="contract-title-display" class="text-xl font-bold text-gray-800 uppercase tracking-tight serif">Loading contract...</h1>
+                        <p id="contract-desc-display" class="text-xs text-gray-500 mt-1 max-w-3xl">--</p>
+                    </div>
+
+                    <!-- Escrow Summary -->
+                    <div class="flex items-center gap-0 bg-gray-50 rounded border border-gray-200 overflow-hidden shrink-0">
+                        <div class="text-center px-4 py-3 border-r border-gray-200">
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Total Budget</div>
+                            <div id="contract-budget-display" class="text-base font-bold font-mono text-gray-800">0 FWK</div>
+                        </div>
+                        <div class="text-center px-4 py-3 border-r border-gray-200">
+                            <div class="text-[10px] text-blue-500 uppercase tracking-wider font-semibold">In Escrow</div>
+                            <div id="contract-escrow-display" class="text-base font-bold font-mono text-blue-700">0 FWK</div>
+                        </div>
+                        <div class="text-center px-4 py-3">
+                            <div class="text-[10px] text-green-600 uppercase tracking-wider font-semibold">Released</div>
+                            <div id="contract-released-display" class="text-base font-bold font-mono text-green-700">0 FWK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                    <div class="flex flex-wrap items-center gap-5 text-gray-600">
+                        <div><span class="text-gray-400">Company: </span><span id="tracker-company-name" class="font-bold text-gray-800">NovaTech Systems</span></div>
+                        <div><span class="text-gray-400">Freelancer: </span><span id="tracker-freelancer-name" class="font-bold text-gray-800">Alex Rivera</span></div>
+                        <div><span class="text-gray-400">Contract Vault: </span><span id="tracker-sc-address" class="text-blue-600">0xSC_...</span></div>
+                    </div>
+                    <div id="tracker-relinquish-alert" class="hidden badge badge-amber flex items-center gap-1.5 animate-pulse py-1 px-3">
+                        <i class="fa-solid fa-scale-balanced"></i> Fair Task Handoff Active
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div class="gov-card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2 serif">
+                        <i class="fa-solid fa-route text-blue-700"></i> Delivery Pipeline Status
+                    </h2>
+                    <span class="text-xs font-mono text-gray-500 font-semibold">State: <span id="pipeline-current-state-text" class="text-blue-700">Stage 3 / 6</span></span>
+                </div>
+
+                <div class="relative py-4 px-2">
+                    <div class="absolute top-1/2 left-8 right-8 -translate-y-1/2 h-1 bg-gray-200 rounded-full z-0">
+                        <div id="tracker-progress-fill" class="h-full bg-blue-700 rounded-full transition-all duration-700" style="width: 50%;"></div>
+                    </div>
+                    <div class="relative z-10 grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+                        <div id="step-node-1" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-done"><i class="fa-solid fa-lock"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-600 mt-2 uppercase">1. Escrow Locked</span>
+                            <span class="text-[9px] text-gray-400">Funds Deposited</span>
+                        </div>
+                        <div id="step-node-2" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-done"><i class="fa-solid fa-user-check"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-600 mt-2 uppercase">2. Allotted</span>
+                            <span class="text-[9px] text-gray-400">Profile Verified</span>
+                        </div>
+                        <div id="step-node-3" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-active"><i class="fa-solid fa-code"></i></div>
+                            <span class="text-[10px] font-semibold text-blue-700 mt-2 uppercase">3. In Execution</span>
+                            <span class="text-[9px] text-gray-400">Work In Progress</span>
+                        </div>
+                        <div id="step-node-4" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-pending"><i class="fa-solid fa-fingerprint"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-400 mt-2 uppercase">4. Submitted</span>
+                            <span class="text-[9px] text-gray-400">Hash Verification</span>
+                        </div>
+                        <div id="step-node-5" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-pending"><i class="fa-solid fa-coins"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-400 mt-2 uppercase">5. Released</span>
+                            <span class="text-[9px] text-gray-400">Conditional Payout</span>
+                        </div>
+                        <div id="step-node-6" class="step-node flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-pending"><i class="fa-solid fa-check-double"></i></div>
+                            <span class="text-[10px] font-semibold text-gray-400 mt-2 uppercase">6. Completed</span>
+                            <span class="text-[9px] text-gray-400">Contract Closed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 p-3 rounded bg-gray-50 border border-gray-200 text-xs font-mono text-gray-500 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-blue-500"></i>
+                        <span id="tracker-status-description">Milestone in progress. Deadline active with penalty buffer safeguard.</span>
+                    </div>
+                    <span id="tracker-stage-timestamp" class="text-gray-400">Audited On-Chain</span>
+                </div>
+            </div>
+
+            <!-- Milestones -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-6 bg-blue-800 rounded"></div>
+                        <h3 class="text-sm font-bold uppercase text-gray-700 tracking-wider serif">Project Milestones &amp; Settlement Conditions</h3>
+                    </div>
+                    <span class="text-xs text-gray-400">Funds locked in escrow are released strictly upon verifiable delivery</span>
+                </div>
+                <div id="milestones-container" class="space-y-3">
+                    <div class="text-center py-6 text-gray-400 text-xs font-mono gov-card p-4">Loading milestones...</div>
+                </div>
+            </div>
+
+            <!-- Relinquishment Ledger -->
+            <div id="relinquish-history-panel" class="hidden gov-card-warning p-5 rounded space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-amber-900 flex items-center gap-2 serif">
+                        <i class="fa-solid fa-scale-balanced text-amber-600"></i> Fairwork Relinquishment &amp; Work Protection Ledger
+                    </span>
+                    <span class="badge badge-amber">Past Work 100% Protected</span>
+                </div>
+                <div id="relinquish-records-list" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- TAB 2: JOB MARKETPLACE -->
+        <section id="view-jobs" class="hidden space-y-5">
+            <div class="flex items-center justify-between pb-4 border-b-2 border-gray-200">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-7 bg-blue-800 rounded"></div>
+                        <h2 class="text-lg font-bold uppercase text-gray-800 tracking-wider serif">Job Contracts Marketplace</h2>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-3 mt-1">Explore open client requests with automated milestone escrows and qualification requirements.</p>
+                </div>
+                <button onclick="switchTab('postjob')" class="btn-primary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Post a Contract
+                </button>
+            </div>
+            <div id="jobs-marketplace-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <!-- TAB 3: FREELANCER PROFILES & MATCH -->
+        <section id="view-freelancers" class="hidden space-y-5">
+            <div class="pb-4 border-b-2 border-gray-200">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-7 bg-blue-800 rounded"></div>
+                    <h2 class="text-lg font-bold uppercase text-gray-800 tracking-wider serif">Verified Contractor Profiles &amp; Qualification Scoring</h2>
+                </div>
+                <p class="text-xs text-gray-500 ml-3 mt-1">Fairwork algorithm ranks candidates: verified skills (50%), client rating (25%), dispute-free reputation (25%).</p>
+            </div>
+
+            <!-- Match Calculator -->
+            <div class="gov-card-accent p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded bg-blue-100 border border-blue-200 text-blue-700 flex items-center justify-center">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-800 serif">Qualification Match Analyser</h4>
+                        <p class="text-xs text-gray-400">Select any contractor to calculate fit percentage for the active contract.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 w-full md:w-auto">
+                    <select id="match-freelancer-select" class="gov-input flex-1 md:flex-none px-3 py-2 text-xs"></select>
+                    <button onclick="runQualificationAnalysis()" class="btn-primary px-4 py-2 text-xs uppercase tracking-wider">
+                        Analyse Match
+                    </button>
+                </div>
+            </div>
+
+            <!-- Match Result -->
+            <div id="match-analysis-result" class="hidden gov-card-success p-5 rounded"></div>
+
+            <!-- Freelancer Directory -->
+            <div id="freelancers-list-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- TAB 4: BLOCKCHAIN EXPLORER -->
+        <section id="view-blockchain" class="hidden space-y-5">
+            <div class="flex items-center justify-between pb-4 border-b-2 border-gray-200">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-7 bg-blue-800 rounded"></div>
+                        <h2 class="text-lg font-bold uppercase text-gray-800 tracking-wider serif">Fairwork Cryptographic Blockchain Ledger</h2>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-3 mt-1">Immutable SHA-256 record of every escrow lock, payout, penalty, and task reassignment.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="mineBlockManual()" class="btn-primary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-hammer"></i> Mine Block
+                    </button>
+                    <button onclick="loadBlockchainData()" class="btn-ghost px-3 py-2 text-xs">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="gov-card p-4">
+                    <span class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Blocks Mined</span>
+                    <div id="bc-total-blocks" class="text-2xl font-bold font-mono text-gray-800 mt-1">--</div>
+                </div>
+                <div class="gov-card p-4">
+                    <span class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Consensus</span>
+                    <div id="bc-difficulty" class="text-base font-bold font-mono text-amber-700 mt-1">PoW (2 Zeros)</div>
+                </div>
+                <div class="gov-card p-4">
+                    <span class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Mempool</span>
+                    <div id="bc-pending-tx" class="text-2xl font-bold font-mono text-blue-700 mt-1">0 TX</div>
+                </div>
+                <div class="gov-card p-4">
+                    <span class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Chain Integrity</span>
+                    <div id="bc-chain-integrity" class="text-sm font-bold font-mono text-green-700 mt-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved"></i> 100% VALID
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-5 bg-blue-800 rounded"></div>
+                    <h3 class="text-sm font-bold uppercase text-gray-700 tracking-wider serif">Mined Blocks (Chain History)</h3>
+                </div>
+                <div id="blocks-stream-container" class="space-y-4"></div>
+            </div>
+        </section>
+
+        <!-- TAB 5: POST NEW CONTRACT -->
+        <section id="view-postjob" class="hidden">
+            <div class="max-w-3xl mx-auto gov-card-accent p-8 space-y-5">
+                <div class="pb-4 border-b border-gray-200">
+                    <h2 class="text-xl font-bold uppercase text-gray-800 serif">Create Milestone-Based Agreement</h2>
+                    <p class="text-xs text-gray-500 mt-1">Lock budget into smart contract escrow. Deliverables will be tracked with staged delivery progress and deadline buffer protection.</p>
+                </div>
+
+                <form id="create-contract-form" onsubmit="handleCreateContract(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Job / Contract Title</label>
+                        <input type="text" id="post-title" required class="gov-input w-full px-4 py-2.5 text-sm" placeholder="e.g. Cross-Chain Escrow Protocol with Relinquishment Failover">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Category</label>
+                            <select id="post-category" class="gov-input w-full px-4 py-2.5 text-sm">
+                                <option>Smart Contract Development</option>
+                                <option>Full-Stack Web3 &amp; UI</option>
+                                <option>Security Audit &amp; Cryptography</option>
+                                <option>AI &amp; Machine Learning</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Required Skills (comma-separated)</label>
+                            <input type="text" id="post-skills" required class="gov-input w-full px-4 py-2.5 text-sm" placeholder="Solidity, Python, Smart Contracts">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Project Scope &amp; Deliverable Criteria</label>
+                        <textarea id="post-desc" rows="3" required class="gov-input w-full px-4 py-2.5 text-sm resize-none" placeholder="Describe technical goals, acceptance criteria, and expected deliverables."></textarea>
+                    </div>
+
+                    <!-- Milestones -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Milestones</span>
+                            <button type="button" onclick="addMilestoneRow()" class="text-xs text-blue-700 hover:text-blue-900 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Add Milestone
+                            </button>
+                        </div>
+
+                        <div id="new-milestones-list" class="space-y-3">
+                            <div class="milestone-input-row p-4 rounded bg-gray-50 border border-gray-200 space-y-3">
+                                <span class="text-xs font-bold text-gray-600">Milestone #1</span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input type="text" class="m-title gov-input w-full px-3 py-1.5 text-xs" placeholder="Title" value="Architecture &amp; Core Implementation">
+                                    <input type="number" class="m-amount gov-input w-full px-3 py-1.5 text-xs" placeholder="Amount (FWK)" value="1500" required>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="text-[10px] text-gray-400 uppercase font-semibold">Deadline (Hours)</label>
+                                        <input type="number" class="m-hours gov-input w-full px-3 py-1.5 text-xs mt-1" value="24">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-400 uppercase font-semibold">Grace Buffer (Hours)</label>
+                                        <input type="number" class="m-buffer gov-input w-full px-3 py-1.5 text-xs mt-1" value="12">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-400 uppercase font-semibold">Late Penalty (%/hr)</label>
+                                        <input type="number" class="m-penalty gov-input w-full px-3 py-1.5 text-xs mt-1" value="3.5">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-200 flex items-center justify-end space-x-3">
+                        <button type="button" onclick="switchTab('tracker')" class="btn-ghost px-4 py-2.5 text-sm">Cancel</button>
+                        <button type="submit" class="btn-primary px-6 py-2.5 text-sm uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-lock"></i> Deploy Contract &amp; Lock Escrow
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: SUBMIT DELIVERABLE -->
+    <div id="modal-submit" class="fixed inset-0 z-50 hidden bg-gray-800/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gov-card max-w-lg w-full rounded p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                <h3 class="text-sm font-bold uppercase text-gray-800 tracking-wide serif">
+                    <i class="fa-solid fa-cloud-arrow-up text-blue-600 mr-2"></i>Submit Milestone Deliverable
+                </h3>
+                <button onclick="closeModal('modal-submit')" class="text-gray-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-500">Your submission is cryptographically hashed (SHA-256) and verified against the smart contract deadline.</p>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Milestone</label>
+                <input type="text" id="modal-submit-milestone-title" disabled class="gov-input w-full px-3 py-2 text-xs bg-gray-100">
+                <input type="hidden" id="modal-submit-milestone-index">
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Deliverable Summary &amp; Test Proofs</label>
+                <textarea id="modal-submit-text" rows="4" class="gov-input w-full px-3 py-2 text-xs resize-none" placeholder="Describe finished deliverables, repo commit hash, or test results..."></textarea>
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Repository / Artifact Link</label>
+                <input type="text" id="modal-submit-link" class="gov-input w-full px-3 py-2 text-xs" placeholder="https://github.com/project/releases/v1.0">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modal-submit')" class="btn-ghost px-4 py-2 text-xs">Cancel</button>
+                <button onclick="executeDeliverableSubmission()" class="btn-primary px-5 py-2 text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-fingerprint mr-1"></i> Generate Proof &amp; Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: APPROVE MILESTONE -->
+    <div id="modal-approve" class="fixed inset-0 z-50 hidden bg-gray-800/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gov-card-success max-w-lg w-full rounded p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-green-200 pb-3">
+                <h3 class="text-sm font-bold uppercase text-green-900 tracking-wide serif">
+                    <i class="fa-solid fa-circle-check text-green-600 mr-2"></i>Approve &amp; Release Escrow Funds
+                </h3>
+                <button onclick="closeModal('modal-approve')" class="text-gray-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-500">The smart contract will deduct late penalties (if any) and execute the payout to the freelancer.</p>
+            <div id="approve-breakdown-box" class="bg-white p-4 rounded border border-green-200 text-xs font-mono space-y-2"></div>
+            <input type="hidden" id="modal-approve-milestone-index">
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modal-approve')" class="btn-ghost px-4 py-2 text-xs">Cancel</button>
+                <button onclick="executeMilestoneApproval()" class="btn-success px-5 py-2 text-xs uppercase tracking-wider">Confirm &amp; Release</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: RELINQUISH -->
+    <div id="modal-relinquish" class="fixed inset-0 z-50 hidden bg-gray-800/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gov-card-warning max-w-lg w-full rounded p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-amber-200 pb-3">
+                <h3 class="text-sm font-bold uppercase text-amber-900 tracking-wide serif">
+                    <i class="fa-solid fa-scale-balanced text-amber-600 mr-2"></i>Relinquish &amp; Reassign Task
+                </h3>
+                <button onclick="closeModal('modal-relinquish')" class="text-gray-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-3 bg-white border border-amber-200 rounded text-xs text-amber-900 space-y-1">
+                <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-gavel text-amber-600"></i> Fairwork Fairness Guarantee:</div>
+                <p>1. All previously completed and approved milestones stay <strong>100% paid</strong> to the original freelancer.</p>
+                <p>2. The incomplete milestone and remaining budget are securely reassigned to a qualified backup freelancer.</p>
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Relinquish Reason</label>
+                <select id="relinquish-reason-select" class="gov-input w-full px-3 py-2 text-xs">
+                    <option>Deadline buffer exceeded - Freelancer unresponsive</option>
+                    <option>Mutual agreement to relinquish remaining milestone scope</option>
+                    <option>Critical project delay - Expedited handoff required</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-semibold text-gray-500 tracking-wider mb-1">Reassign To Freelancer</label>
+                <select id="relinquish-freelancer-select" class="gov-input w-full px-3 py-2 text-xs"></select>
+            </div>
+            <input type="hidden" id="modal-relinquish-milestone-index">
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('modal-relinquish')" class="btn-ghost px-4 py-2 text-xs">Cancel</button>
+                <button onclick="executeRelinquishment()" class="btn-warning px-5 py-2 text-xs uppercase tracking-wider">Execute Fair Reassignment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // State
+        let currentPersona = 'company_novatech';
+        let currentContract = null;
+        let activeContractId = 'FWK-CONTRACT-101';
+        let virtualTime = 0;
+        let allFreelancers = [];
+
+        // ───── PERSONA SWITCHER ─────
+        function setPersona(persona) {
+            currentPersona = persona;
+            document.querySelectorAll('.persona-btn').forEach(b => {
+                b.className = 'persona-btn persona-btn-inactive';
+            });
+            const activeBtn = document.getElementById(`btn-persona-${persona.split('_')[1]}`);
+            if (activeBtn) activeBtn.className = 'persona-btn persona-btn-active';
+            refreshData();
+        }
+
+        // ───── TAB SWITCHING ─────
+        function switchTab(tab) {
+            ['tracker', 'jobs', 'freelancers', 'blockchain', 'postjob'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    btn.className = t === tab
+                        ? 'tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-active transition'
+                        : 'tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center gap-2 tab-gov-inactive transition';
+                }
+            });
+            if (tab === 'blockchain') loadBlockchainData();
+            if (tab === 'freelancers') loadFreelancersData();
+            if (tab === 'jobs') loadJobsMarketplace();
+        }
+
+        function renderDemoContractsSwitcher(contracts) {
+            const grid = document.getElementById('demo-contracts-switcher-grid');
+            const badge = document.getElementById('demo-contracts-count-badge');
+            if (!grid) return;
+
+            let filtered = contracts;
+            if (currentPersona.startsWith('freelancer_')) {
+                const mine = contracts.filter(c =>
+                    c.current_freelancer_id === currentPersona ||
+                    (c.milestones || []).some(m => m.assigned_freelancer_id === currentPersona) ||
+                    (c.applications || []).some(a => a.freelancer_id === currentPersona)
+                );
+                if (mine.length > 0) filtered = mine;
+            } else if (currentPersona.startsWith('company_')) {
+                const mine = contracts.filter(c => c.company_id === currentPersona);
+                if (mine.length > 0) filtered = mine;
+            }
+
+            if (badge) {
+                badge.innerText = `${filtered.length} ${filtered.length === 1 ? 'Contract' : 'Contracts'}`;
+            }
+
+            grid.innerHTML = '';
+            filtered.forEach(c => {
+                const isSelected = (c.id === activeContractId);
+                const totalM = (c.milestones || []).length;
+                const approvedM = (c.milestones || []).filter(m => m.status === 'APPROVED').length;
+                const card = document.createElement('div');
+                card.onclick = () => setActiveContract(c.id);
+                card.className = `cursor-pointer p-4 rounded border transition flex flex-col justify-between gap-2 ${
+                    isSelected
+                        ? 'bg-blue-50/70 border-2 border-blue-800 shadow-sm'
+                        : 'bg-white border-gray-200 hover:border-blue-700 hover:bg-gray-50'
+                }`;
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="badge badge-navy font-mono">${c.id}</span>
+                            <span class="badge ${c.status === 'ALLOTTED' || c.status === 'COMPLETED' ? 'badge-green' : 'badge-amber'}">${c.status}</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-gray-800 serif line-clamp-1">${c.title}</h4>
+                        <div class="text-[11px] text-gray-500 font-mono flex items-center justify-between">
+                            <span>${c.company_name} → ${c.freelancer_name}</span>
+                            <span>${approvedM}/${totalM} Milestones</span>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-200 flex items-center justify-between text-xs font-mono">
+                        <span class="font-bold text-gray-800">${c.total_budget.toLocaleString()} FWK</span>
+                        <span class="text-green-700 font-semibold">${c.escrow_released.toLocaleString()} FWK Released</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ───── DATA REFRESH ─────
+        async function refreshData() {
+            try {
+                const resOverview = await fetch('/api/overview');
+                const overview = await resOverview.json();
+                document.getElementById('virtual-clock-display').innerText = overview.virtual_time_str;
+                virtualTime = overview.virtual_time;
+
+                const resMe = await fetch('/api/me');
+                if (resMe.ok) {
+                    const meData = await resMe.json();
+                    document.getElementById('user-wallet-balance').innerText = `${meData.user.wallet_balance.toLocaleString()} FWK`;
+                }
+
+                const resAll = await fetch('/api/contracts');
+                if (resAll.ok) {
+                    const allData = await resAll.json();
+                    renderDemoContractsSwitcher(allData.contracts || []);
+                }
+
+                const resC = await fetch(`/api/contract/${activeContractId}`);
+                if (resC.ok) {
+                    const data = await resC.json();
+                    currentContract = data.contract;
+                    renderContract(currentContract, virtualTime);
+                }
+
+                const resBC = await fetch('/api/blockchain');
+                if (resBC.ok) {
+                    const bcData = await resBC.json();
+                    document.getElementById('block-height-badge').innerText = `#${bcData.chain.length - 1}`;
+                    document.getElementById('bc-total-blocks').innerText = bcData.chain.length;
+                    document.getElementById('bc-pending-tx').innerText = `${bcData.pending_transactions.length} TX`;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ───── CONTRACT RENDERER ─────
+        function renderContract(c, virtualTime) {
+            document.getElementById('contract-id-badge').innerText = c.id;
+            document.getElementById('contract-status-badge').innerText = c.status;
+            document.getElementById('contract-title-display').innerText = c.title;
+            document.getElementById('contract-desc-display').innerText = c.description;
+            document.getElementById('contract-budget-display').innerText = `${c.total_budget.toLocaleString()} FWK`;
+            document.getElementById('contract-escrow-display').innerText = `${(c.escrow_locked - c.escrow_released).toLocaleString()} FWK`;
+            document.getElementById('contract-released-display').innerText = `${c.escrow_released.toLocaleString()} FWK`;
+            document.getElementById('tracker-company-name').innerText = c.company_name;
+            document.getElementById('tracker-freelancer-name').innerText = c.freelancer_name;
+            document.getElementById('tracker-sc-address').innerText = c.smart_contract_address;
+
+            const stage = c.tracker_stage || 1;
+            document.getElementById('pipeline-current-state-text').innerText = `Stage ${stage} / 6: ${c.tracker_stage_label}`;
+            const pct = Math.min(100, Math.round(((stage - 1) / 5) * 100));
+            document.getElementById('tracker-progress-fill').style.width = `${pct}%`;
+
+            for (let i = 1; i <= 6; i++) {
+                const node = document.getElementById(`step-node-${i}`);
+                if (!node) continue;
+                const circle = node.querySelector('div');
+                const label = node.querySelector('span:first-of-type');
+                if (i < stage) {
+                    circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-done';
+                    label.className = 'text-[10px] font-semibold text-gray-500 mt-2 uppercase';
+                } else if (i === stage) {
+                    circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-active';
+                    label.className = 'text-[10px] font-semibold text-blue-700 mt-2 uppercase';
+                } else {
+                    circle.className = 'w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs transition-all duration-300 tracker-step-pending';
+                    label.className = 'text-[10px] font-semibold text-gray-400 mt-2 uppercase';
+                }
+            }
+
+            document.getElementById('tracker-status-description').innerText = c.tracker_stage_label;
+
+            const relinqAlert = document.getElementById('tracker-relinquish-alert');
+            const relinqPanel = document.getElementById('relinquish-history-panel');
+            if (c.relinquish_history && c.relinquish_history.length > 0) {
+                relinqAlert.classList.remove('hidden');
+                relinqPanel.classList.remove('hidden');
+                renderRelinquishHistory(c.relinquish_history);
+            } else {
+                relinqAlert.classList.add('hidden');
+                relinqPanel.classList.add('hidden');
+            }
+
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
+            c.milestones.forEach((m, idx) => {
+                const isCurrentActive = (idx === c.current_milestone_index && c.status !== 'COMPLETED');
+                const card = document.createElement('div');
+                card.className = `milestone-card p-5 ${isCurrentActive ? 'active' : ''}`;
+
+                let isLate = false, isOverBuffer = false, delayHours = 0;
+                if (m.deadline_timestamp && m.status === 'IN_PROGRESS' && virtualTime > m.deadline_timestamp) {
+                    isLate = true;
+                    delayHours = Math.round((virtualTime - m.deadline_timestamp) / 3600);
+                    if (virtualTime > m.buffer_expiry_timestamp) isOverBuffer = true;
+                }
+
+                let timeStatusHtml = '';
+                if (m.status === 'APPROVED') timeStatusHtml = `<span class="badge badge-green"><i class="fa-solid fa-check mr-1"></i>Completed &amp; Paid</span>`;
+                else if (m.status === 'RELINQUISHED') timeStatusHtml = `<span class="badge badge-amber">Reassigned</span>`;
+                else if (isOverBuffer) timeStatusHtml = `<span class="badge badge-red animate-pulse"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Grace Buffer Expired (+${delayHours}h late)</span>`;
+                else if (isLate) {
+                    const penaltyEstimate = Math.min(m.max_penalty_percent, delayHours * m.penalty_rate_per_hour);
+                    timeStatusHtml = `<span class="badge badge-amber"><i class="fa-regular fa-clock mr-1"></i>Deadline Passed: +${delayHours}h (-${penaltyEstimate.toFixed(1)}% Penalty)</span>`;
+                } else if (m.status === 'SUBMITTED') timeStatusHtml = `<span class="badge badge-teal"><i class="fa-solid fa-fingerprint mr-1"></i>Submitted — Pending Review</span>`;
+                else timeStatusHtml = `<span class="badge badge-navy font-mono">Deadline: ${m.deadline_hours}h (+${m.buffer_hours}h buffer)</span>`;
+
+                let actionsHtml = '';
+                if (m.status === 'IN_PROGRESS' || m.status === 'SUBMITTED') {
+                    if (currentPersona.startsWith('freelancer')) {
+                        actionsHtml += `<button onclick="openSubmitModal(${m.index}, '${m.title}')" class="btn-primary px-3.5 py-1.5 text-xs uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-cloud-arrow-up"></i>${m.status === 'SUBMITTED' ? 'Update Submission' : 'Submit Deliverable'}</button>`;
+                    }
+                    if (currentPersona.startsWith('company') && m.status === 'SUBMITTED') {
+                        actionsHtml += `<button onclick="openApproveModal(${m.index})" class="btn-success px-3.5 py-1.5 text-xs uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i>Approve &amp; Payout</button>`;
+                    }
+                    actionsHtml += `<button onclick="openRelinquishModal(${m.index})" class="btn-ghost px-3.5 py-1.5 text-xs uppercase tracking-wider flex items-center gap-1.5${isOverBuffer ? ' animate-pulse' : ''}" title="Fairly reassign task"><i class="fa-solid fa-rotate"></i>Relinquish</button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-gray-800 text-sm serif">${m.title}</span>
+                                ${timeStatusHtml}
+                            </div>
+                            <p class="text-xs text-gray-500">${m.description}</p>
+                            ${m.deliverable_hash ? `<div class="mt-2 text-[10px] font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200"><i class="fa-solid fa-hashtag mr-1"></i>Deliverable Hash: ${m.deliverable_hash.substring(0, 24)}...</div>` : ''}
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div class="text-right font-mono">
+                                <div class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Milestone Amount</div>
+                                <div class="text-sm font-bold text-gray-800">${m.amount.toLocaleString()} FWK</div>
+                                ${m.penalty_amount > 0 ? `<div class="text-[10px] text-red-600">-${m.penalty_amount} FWK Late Penalty</div>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2">${actionsHtml}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderRelinquishHistory(records) {
+            const list = document.getElementById('relinquish-records-list');
+            list.innerHTML = '';
+            records.forEach(r => {
+                const item = document.createElement('div');
+                item.className = 'p-3 rounded bg-white border border-amber-200 text-xs font-mono flex flex-col md:flex-row md:items-center justify-between gap-2';
+                item.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2 font-semibold">
+                            <span class="text-amber-800">Milestone #${r.milestone_index + 1} Handed Off:</span>
+                            <span class="text-gray-700">${r.previous_freelancer_name}</span>
+                            <i class="fa-solid fa-arrow-right text-gray-400 text-[10px]"></i>
+                            <span class="text-blue-700">${r.new_freelancer_name}</span>
+                        </div>
+                        <div class="text-[11px] text-gray-400 mt-0.5">Reason: ${r.reason}</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-mono text-green-700 font-bold">${r.remaining_budget.toLocaleString()} FWK</span>
+                        <div class="text-[10px] text-gray-400">Prorated Remaining Allotment</div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        async function loadBlockchainData() {
+            try {
+                const res = await fetch('/api/blockchain');
+                const data = await res.json();
+                document.getElementById('bc-total-blocks').innerText = data.chain.length;
+                document.getElementById('bc-pending-tx').innerText = `${data.pending_transactions.length} TX`;
+                const container = document.getElementById('blocks-stream-container');
+                container.innerHTML = '';
+                const reversed = [...data.chain].reverse();
+                reversed.forEach(block => {
+                    const blockCard = document.createElement('div');
+                    blockCard.className = 'gov-card p-5 space-y-3';
+                    let txsHtml = '';
+                    block.transactions.forEach(tx => {
+                        let badgeClass = 'badge-navy';
+                        if (tx.tx_type === 'ESCROW_LOCK') badgeClass = 'badge-green';
+                        if (tx.tx_type === 'MILESTONE_PAYOUT') badgeClass = 'badge-teal';
+                        if (tx.tx_type === 'PENALTY_REFUND') badgeClass = 'badge-red';
+                        if (tx.tx_type === 'TASK_RELINQUISHED_AND_REASSIGNED') badgeClass = 'badge-amber';
+                        txsHtml += `
+                            <div class="p-2.5 rounded bg-gray-50 border border-gray-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div class="space-y-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="badge ${badgeClass} font-mono">${tx.tx_type}</span>
+                                        <span class="font-mono text-gray-400 text-[11px]">${tx.tx_id.substring(0, 16)}...</span>
+                                    </div>
+                                    <div class="text-[11px] text-gray-400 font-mono">${tx.sender.substring(0, 14)}... → ${tx.recipient.substring(0, 14)}...</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-mono font-bold text-gray-800">${tx.amount > 0 ? `${tx.amount} FWK` : 'State Sync'}</div>
+                                    <div class="text-[10px] font-mono text-gray-400">${tx.signature}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    blockCard.innerHTML = `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-gray-200">
+                            <div class="flex items-center space-x-2">
+                                <span class="badge badge-amber font-mono font-bold">BLOCK #${block.index}</span>
+                                <span class="text-xs font-mono text-gray-400">${new Date(block.timestamp * 1000).toISOString()}</span>
+                            </div>
+                            <div class="text-xs font-mono text-gray-500">Nonce: <span class="text-gray-800 font-bold">${block.nonce}</span></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono">
+                            <div class="bg-gray-50 p-2 rounded border border-gray-200 truncate"><span class="text-gray-400">Hash: </span><span class="text-blue-700 font-semibold">${block.hash}</span></div>
+                            <div class="bg-gray-50 p-2 rounded border border-gray-200 truncate"><span class="text-gray-400">Prev: </span><span class="text-gray-500">${block.previous_hash}</span></div>
+                            <div class="bg-gray-50 p-2 rounded border border-gray-200 truncate md:col-span-2"><span class="text-gray-400">Merkle Root: </span><span class="text-amber-700">${block.merkle_root}</span></div>
+                        </div>
+                        <div class="space-y-1.5 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Transactions in Block (${block.tx_count}):</span>
+                            ${txsHtml}
+                        </div>
+                    `;
+                    container.appendChild(blockCard);
+                });
+            } catch (err) { console.error("Error loading blockchain:", err); }
+        }
+
+        async function loadFreelancersData() {
+            try {
+                const res = await fetch('/api/freelancers');
+                const data = await res.json();
+                allFreelancers = data.freelancers;
+                const select = document.getElementById('match-freelancer-select');
+                select.innerHTML = '';
+                allFreelancers.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.innerText = `${f.name} — ${f.title}`;
+                    select.appendChild(opt);
+                });
+                const relinqSelect = document.getElementById('relinquish-freelancer-select');
+                relinqSelect.innerHTML = '';
+                allFreelancers.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.innerText = `${f.name} (${f.title}) - Rating ${f.rating}`;
+                    relinqSelect.appendChild(opt);
+                });
+                const container = document.getElementById('freelancers-list-container');
+                container.innerHTML = '';
+                allFreelancers.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'gov-card p-5 flex flex-col justify-between space-y-4';
+                    let badgesHtml = (f.badges || []).map(b => `<span class="badge badge-navy">${b}</span>`).join('');
+                    let skillsHtml = (f.skills || []).map(s => `<span class="badge badge-teal font-mono">${s}</span>`).join('');
+                    card.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <img src="${f.avatar}" class="w-12 h-12 rounded-full object-cover border border-gray-300">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-800 serif">${f.name}</h4>
+                                    <p class="text-xs text-blue-700 font-medium">${f.title}</p>
+                                    <div class="flex items-center space-x-2 text-[11px] text-gray-500 mt-0.5">
+                                        <span class="text-amber-600"><i class="fa-solid fa-star"></i> ${f.rating}</span>
+                                        <span>·</span><span>${f.completed_jobs} Jobs</span>
+                                        <span>·</span><span class="text-green-700 font-semibold">${f.reputation_score}/1000 Rep</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 leading-relaxed">${f.bio}</p>
+                            <div class="flex flex-wrap gap-1">${badgesHtml}</div>
+                            <div class="space-y-1">
+                                <span class="text-[10px] uppercase font-bold text-gray-400">Verified Skills</span>
+                                <div class="flex flex-wrap gap-1">${skillsHtml}</div>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 uppercase font-semibold">Rate</span>
+                                <div class="text-xs font-bold font-mono text-gray-800">\$${f.hourly_rate}/hr</div>
+                            </div>
+                            <button onclick="requestAllotDirect('${f.id}')" class="btn-primary px-3.5 py-1.5 text-xs uppercase tracking-wider">Allot to Job</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error("Error loading freelancers:", err); }
+        }
+
+        async function runQualificationAnalysis() {
+            const freelancerId = document.getElementById('match-freelancer-select').value;
+            if (!currentContract) return;
+            try {
+                const res = await fetch('/api/qualification_match', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ freelancer_id: freelancerId, required_skills: currentContract.required_skills })
+                });
+                const data = await res.json();
+                const m = data.match;
+                const resultBox = document.getElementById('match-analysis-result');
+                resultBox.classList.remove('hidden');
+                resultBox.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-bold text-gray-800 serif">${data.freelancer_name} Qualification Match</h4>
+                                <span class="badge ${m.match_percentage >= 85 ? 'badge-green' : 'badge-amber'} font-mono">${m.match_percentage}% MATCH</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Multi-factor algorithmic rating for "${currentContract.title}"</p>
+                            <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                <span class="text-green-700">✓ Matched: ${m.matched_skills.join(', ') || 'None'}</span>
+                                ${m.missing_skills.length > 0 ? `<span class="text-red-600">✗ Missing: ${m.missing_skills.join(', ')}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="gov-card p-2">
+                                <div class="text-[9px] text-gray-400 uppercase font-semibold">Skill (50%)</div>
+                                <div class="font-bold text-gray-800 font-mono">${m.skill_match_weight} / 50</div>
+                            </div>
+                            <div class="gov-card p-2">
+                                <div class="text-[9px] text-gray-400 uppercase font-semibold">Rating (25%)</div>
+                                <div class="font-bold text-gray-800 font-mono">${m.rating_weight} / 25</div>
+                            </div>
+                            <div class="gov-card p-2">
+                                <div class="text-[9px] text-gray-400 uppercase font-semibold">Reputation (25%)</div>
+                                <div class="font-bold text-gray-800 font-mono">${m.reputation_weight} / 25</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) { console.error("Error analyzing match:", err); }
+        }
+
+        async function loadJobsMarketplace() {
+            try {
+                const res = await fetch('/api/contracts');
+                const data = await res.json();
+                const container = document.getElementById('jobs-marketplace-grid');
+                container.innerHTML = '';
+                data.contracts.forEach(c => {
+                    const card = document.createElement('div');
+                    card.className = 'gov-card p-5 space-y-4 flex flex-col justify-between';
+                    let skillsHtml = c.required_skills.map(s => `<span class="badge badge-teal font-mono">${s}</span>`).join('');
+                    card.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="badge badge-navy font-mono">${c.id}</span>
+                                <span class="badge badge-green">${c.status}</span>
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-800 serif">${c.title}</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">${c.description}</p>
+                            <div class="flex flex-wrap gap-1">${skillsHtml}</div>
+                            <div class="gov-card p-3 flex items-center justify-between text-xs">
+                                <div>
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold">Company</span>
+                                    <div class="font-semibold text-gray-700">${c.company_name}</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold">Escrow Budget</span>
+                                    <div class="font-mono font-bold text-green-700">${c.total_budget.toLocaleString()} FWK</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+                            <button onclick="setActiveContract('${c.id}')" class="btn-ghost px-4 py-2 text-xs uppercase tracking-wider">Open Tracker</button>
+                            <button onclick="applyToContract('${c.id}')" class="btn-primary px-4 py-2 text-xs uppercase tracking-wider">Apply for Job</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error("Error loading marketplace:", err); }
+        }
+
+        function setActiveContract(id) {
+            activeContractId = id;
+            switchTab('tracker');
+            refreshData();
+        }
+
+        async function applyToContract(contractId) {
+            const freelancerId = currentPersona.startsWith('freelancer') ? currentPersona : 'freelancer_alex';
+            try {
+                const res = await fetch(`/api/contracts/${contractId}/apply`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ freelancer_id: freelancerId, proposal_text: "Qualified blockchain engineer with verified milestone completion record." })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Applied successfully! Match: ${data.application.qualification_score.match_percentage}%`, "success");
+                    refreshData();
+                } else showToast(data.error, "error");
+            } catch (err) { showToast("Application failed", "error"); }
+        }
+
+        async function requestAllotDirect(freelancerId) {
+            try {
+                const res = await fetch(`/api/contracts/${activeContractId}/allot`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ freelancer_id: freelancerId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Contract allotted to ${freelancerId}! Milestone 1 started.`, "success");
+                    switchTab('tracker');
+                    refreshData();
+                } else showToast(data.error, "error");
+            } catch (err) { showToast("Allotment error", "error"); }
+        }
+
+        async function advanceTime(hours) {
+            try {
+                await fetch('/api/time/advance', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ hours })
+                });
+                showToast(`Advanced time +${hours} hours`, "info");
+                refreshData();
+            } catch (err) { console.error("Error advancing time:", err); }
+        }
+
+        async function resetTime() {
+            try {
+                await fetch('/api/time/reset', { method: 'POST' });
+                showToast("Reset simulation clock to present", "info");
+                refreshData();
+            } catch (err) { console.error("Error resetting time:", err); }
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function openSubmitModal(milestoneIndex, title) {
+            document.getElementById('modal-submit-milestone-index').value = milestoneIndex;
+            document.getElementById('modal-submit-milestone-title').value = title;
+            document.getElementById('modal-submit').classList.remove('hidden');
+        }
+
+        async function executeDeliverableSubmission() {
+            const idx = parseInt(document.getElementById('modal-submit-milestone-index').value);
+            const text = document.getElementById('modal-submit-text').value;
+            const link = document.getElementById('modal-submit-link').value;
+            const freelancerId = currentPersona.startsWith('freelancer') ? currentPersona : 'freelancer_alex';
+            try {
+                const res = await fetch(`/api/contracts/${activeContractId}/submit_deliverable`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ milestone_index: idx, freelancer_id: freelancerId, deliverable_text: text, deliverable_link: link })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal('modal-submit');
+                    const r = data.result;
+                    if (r.is_late) showToast(`Deliverable submitted (+${r.delay_hours}h late). SHA-256 Proof logged on blockchain!`, "warning");
+                    else showToast(`Deliverable submitted on time! SHA-256 Proof logged on blockchain.`, "success");
+                    refreshData();
+                } else showToast(data.error, "error");
+            } catch (err) { showToast("Submission failed", "error"); }
+        }
+
+        function openApproveModal(milestoneIndex) {
+            const m = currentContract.milestones[milestoneIndex];
+            document.getElementById('modal-approve-milestone-index').value = milestoneIndex;
+            let delay = m.delay_hours || 0;
+            let penalty = 0;
+            if (delay > 0) {
+                let pPct = Math.min(m.max_penalty_percent, delay * m.penalty_rate_per_hour);
+                penalty = (pPct / 100) * m.amount;
+            }
+            let payout = m.amount - penalty;
+            const box = document.getElementById('approve-breakdown-box');
+            box.innerHTML = `
+                <div class="flex justify-between"><span class="text-gray-400">Milestone Base Budget:</span><span class="text-gray-800 font-bold">${m.amount.toLocaleString()} FWK</span></div>
+                <div class="flex justify-between text-red-600"><span>Late Penalty Deduction (${delay}h delay):</span><span class="font-bold">-${penalty.toFixed(2)} FWK</span></div>
+                <div class="h-px bg-gray-200 my-1"></div>
+                <div class="flex justify-between text-green-700 font-bold"><span>Net Freelancer Payout:</span><span>${payout.toFixed(2)} FWK</span></div>
+                <div class="flex justify-between text-blue-600 text-[11px]"><span>Refunded to Company Wallet:</span><span>${penalty.toFixed(2)} FWK</span></div>
+            `;
+            document.getElementById('modal-approve').classList.remove('hidden');
+        }
+
+        async function executeMilestoneApproval() {
+            const idx = parseInt(document.getElementById('modal-approve-milestone-index').value);
+            try {
+                const res = await fetch(`/api/contracts/${activeContractId}/approve_milestone`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ milestone_index: idx, company_id: currentContract.company_id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal('modal-approve');
+                    showToast(`Milestone approved! Payout: ${data.result.payout} FWK released via Smart Contract.`, "success");
+                    refreshData();
+                } else showToast(data.error, "error");
+            } catch (err) { showToast("Approval error", "error"); }
+        }
+
+        function openRelinquishModal(milestoneIndex) {
+            document.getElementById('modal-relinquish-milestone-index').value = milestoneIndex;
+            document.getElementById('modal-relinquish').classList.remove('hidden');
+        }
+
+        async function executeRelinquishment() {
+            const idx = parseInt(document.getElementById('modal-relinquish-milestone-index').value);
+            const reason = document.getElementById('relinquish-reason-select').value;
+            const newFreelancerId = document.getElementById('relinquish-freelancer-select').value;
+            try {
+                const res = await fetch(`/api/contracts/${activeContractId}/relinquish`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ milestone_index: idx, reason: reason, new_freelancer_id: newFreelancerId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal('modal-relinquish');
+                    showToast(`Fairwork Handoff Complete! Reassigned to ${data.result.new_freelancer}. Prior completed work protected.`, "success");
+                    refreshData();
+                } else showToast(data.error, "error");
+            } catch (err) { showToast("Relinquishment failed", "error"); }
+        }
+
+        async function mineBlockManual() {
+            try {
+                const res = await fetch('/api/blockchain/mine', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Mined Block #${data.block.index}! Nonce: ${data.block.nonce}`, "success");
+                    loadBlockchainData();
+                    refreshData();
+                }
+            } catch (err) { showToast("Mining error", "error"); }
+        }
+
+        let milestoneRowCount = 1;
+        function addMilestoneRow() {
+            milestoneRowCount++;
+            const container = document.getElementById('new-milestones-list');
+            const row = document.createElement('div');
+            row.className = 'milestone-input-row p-4 rounded bg-gray-50 border border-gray-200 space-y-3';
+            row.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-gray-600">Milestone #${milestoneRowCount}</span>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-500 text-xs hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input type="text" class="m-title gov-input w-full px-3 py-1.5 text-xs" placeholder="Title" value="Deliverable #${milestoneRowCount}">
+                    <input type="number" class="m-amount gov-input w-full px-3 py-1.5 text-xs" placeholder="Amount (FWK)" value="1000" required>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-semibold">Deadline (Hours)</label>
+                        <input type="number" class="m-hours gov-input w-full px-3 py-1.5 text-xs mt-1" value="24">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-semibold">Grace Buffer (Hours)</label>
+                        <input type="number" class="m-buffer gov-input w-full px-3 py-1.5 text-xs mt-1" value="12">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-semibold">Late Penalty (%/hr)</label>
+                        <input type="number" class="m-penalty gov-input w-full px-3 py-1.5 text-xs mt-1" value="3.5">
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        async function handleCreateContract(e) {
+            e.preventDefault();
+            const title = document.getElementById('post-title').value;
+            const category = document.getElementById('post-category').value;
+            const skillsStr = document.getElementById('post-skills').value;
+            const description = document.getElementById('post-desc').value;
+            const skills = skillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            const rows = document.querySelectorAll('.milestone-input-row');
+            const milestones = [];
+            rows.forEach((r, idx) => {
+                milestones.push({
+                    title: r.querySelector('.m-title').value || `Milestone #${idx+1}`,
+                    amount: parseFloat(r.querySelector('.m-amount').value || 1000),
+                    deadline_hours: parseFloat(r.querySelector('.m-hours').value || 24),
+                    buffer_hours: parseFloat(r.querySelector('.m-buffer').value || 12),
+                    penalty_rate_per_hour: parseFloat(r.querySelector('.m-penalty').value || 3.5),
+                    max_penalty_percent: 30.0
+                });
+            });
+            try {
+                const res = await fetch('/api/contracts/create', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ company_id: currentPersona.startsWith('company') ? currentPersona : 'company_novatech', title, category, description, required_skills: skills, milestones })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast("Contract deployed & escrow locked in Smart Contract!", "success");
+                    activeContractId = data.contract.id;
+                    switchTab('tracker');
+                    refreshData();
+                } else showToast(data.error, "error");
+            } catch (err) { showToast("Contract creation failed", "error"); }
+        }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let cls = 'p-3.5 rounded border shadow-lg text-xs font-semibold font-mono flex items-center gap-2 pointer-events-auto';
+            let bg = 'bg-white border-gray-300 text-gray-800';
+            let icon = 'fa-info-circle text-blue-600';
+            if (type === 'success') { bg = 'bg-green-50 border-green-300 text-green-900'; icon = 'fa-circle-check text-green-600'; }
+            else if (type === 'warning') { bg = 'bg-amber-50 border-amber-300 text-amber-900'; icon = 'fa-triangle-exclamation text-amber-600'; }
+            else if (type === 'error') { bg = 'bg-red-50 border-red-300 text-red-900'; icon = 'fa-circle-exclamation text-red-600'; }
+            toast.className = `${cls} ${bg}`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshData();
+            setInterval(refreshData, 15000);
+        });
+    </script>
+</body>
+</html>
